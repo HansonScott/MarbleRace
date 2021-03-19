@@ -14,7 +14,10 @@ public class Race
     public string displayName { get; set; }
     private int _trackID;
     private int _lapCount;
+    public int TotalLaps { get { return _lapCount; } }
+
     private int _currentLap = 1;
+    public int CurrentLap { get { return _currentLap; } }
 
     private float _startDelay;
     public float StartDelay { get { return _startDelay; } }
@@ -133,6 +136,17 @@ public class Race
             {
                 racers[i].finishTime = t;
             }
+        }
+    }
+
+    internal void RemoveSlowestPlayers(int removeCount)
+    {
+        // assumption: the racers have already been sorted by their previous lap time
+        for(int i = racers.Count - 1; i >= 0 && removeCount > 0; i--)
+        {
+            racers[i].Sphere.SetActive(false);
+            racers.RemoveAt(i);
+            removeCount--;
         }
     }
 }

@@ -157,6 +157,46 @@ public class GameManager : Singleton<GameManager>
 
     public void NextButtonPressed()
     {
+        // advance the lap
+        currentRace.AdanceLap();
 
+        // now see if we're done with the entire race
+        if (currentRace.isRaceComplete)
+        {
+            // then we are done, return to main menu
+            UIManager.Instance.MainMenu();
+        }
+        else
+        {
+            // NOTE: need to remove the players from the list before unloading the scene
+            // calculate players to remove from the list
+            int remove = CalculateRemoval(currentRace.TotalLaps, currentRace.CurrentLap, currentRace.racers.Count);
+            currentRace.RemoveSlowestPlayers(remove);
+
+            // unload the previous track
+            // scene manager to load and show this race
+            AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(currentRace.SceneName);
+
+            // this will finish the loading of the level and all subsequent details
+            levelUnLoading.completed += LevelUnLoading_completed;
+        }
+    }
+
+    private void LevelUnLoading_completed(AsyncOperation obj)
+    {
+        // restart the scene
+        StartRace();
+    }
+
+    private int CalculateRemoval(int totalLaps, int currentLap, int playerCount)
+    {
+        // theory - linearly remove some on each lap until 5 are left on last lap
+        //int lapsLeft = totalLaps - currentLap;
+        //int playersToRemove = (playerCount - 5);
+        //int playersToRemoveThisLap = playersToRemove / lapsLeft;
+        //int result = playersToRemoveThisLap;
+        //return result;
+
+        return ((playerCount - 5) / (totalLaps + 1 - currentLap));
     }
 }
