@@ -161,6 +161,9 @@ public class GameManager : Singleton<GameManager>
         // advance the lap
         currentRace.AdanceLap();
 
+        // clear out results grid
+        UIManager.Instance.ClearResultsScreen();
+
         // unload the level, regardless of the outcome
         UnloadCurrentLevel();
 

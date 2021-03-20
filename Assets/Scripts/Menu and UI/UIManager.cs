@@ -401,6 +401,18 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
+    internal void ClearResultsScreen()
+    {
+        // assign the row to the grid as a child
+        Transform viewport = resultsGrid.transform.GetChild(0);
+        Transform content = viewport.GetChild(0);
+        GameObject[] rows = GameObject.FindGameObjectsWithTag("ResultsGridRow");
+        for(int i = 0; i < rows.Length; i++)
+        {
+            GameObject.Destroy(rows[i]);
+        }        
+    }
+
     #region public gameState changes
     public void MainMenu()
     {
