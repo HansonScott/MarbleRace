@@ -53,9 +53,7 @@ public class GameManager : Singleton<GameManager>
         // set this scene as active, so we can add players to it.
         UnityEngine.SceneManagement.SceneManager.SetActiveScene(levelScene);
 
-        // before adding players, we need to add the player camera
-        PlayerCameraController cam = GameObject.Instantiate<PlayerCameraController>(playerCameraControllerPrefab);
-
+        // reference all the game objects, for the collision adjustment depending on track type
         List<GameObject> playersToAdjust = new List<GameObject>();
 
         // place all players in starting area of the race
@@ -72,6 +70,8 @@ public class GameManager : Singleton<GameManager>
                 player.SphereName = r.Name;
 
                 // link references to camera, both ways
+                // before adding players, we need to add the player camera
+                PlayerCameraController cam = GameObject.Instantiate<PlayerCameraController>(playerCameraControllerPrefab);
                 player.playerCameraFocalPoint = cam;
                 cam.player = player.gameObject;
 
@@ -161,39 +161,48 @@ public class GameManager : Singleton<GameManager>
         // advance the lap
         currentRace.AdanceLap();
 
-        // now see if we're done with the entire race
-        if (currentRace.isRaceComplete)
+        // unload the level, regardless of the outcome
+        UnloadCurrentLevel();
+
+        // if we're not done, then figure out next lap
+        if (!currentRace.isRaceComplete)
         {
-            // then we are done, return to main menu
-            UIManager.Instance.MainMenu();
-        }
-        else
-        {
-            // NOTE: need to remove the players from the list before unloading the scene
             // calculate players to remove from the list
             int remove = CalculateRemoval(currentRace.TotalLaps, currentRace.CurrentLap, currentRace.racers.Count);
             currentRace.RemoveSlowestPlayers(remove);
 
-            if(!currentRace.PlayerAmongRacers())
+            if (currentRace.PlayerAmongRacers())
             {
-                // then we have failed.
-                Debug.Log("Player has been eliminated.  Try again next time!");
-
-                UIManager.Instance.MainMenu();
+                // restart the scene for the next lap
+                StartRace();
+                return;
             }
-
-            // unload the previous track
-            AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(currentRace.SceneName);
-
-            // this will finish the unloading of the level and all subsequent details
-            levelUnLoading.completed += LevelUnLoading_completed;
+            else
+            {
+                Debug.Log("Player has been eliminated.  Try again next time!");
+            }
         }
+
+        // then we have failed or it's the end of this race entirely.
+        ClearCurrentRace();
+        UIManager.Instance.MainMenu();
+    }
+    private void UnloadCurrentLevel()
+    {
+        // unload the previous track
+        AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(currentRace.SceneName);
+
+        // this will finish the unloading of the level and all subsequent details
+        levelUnLoading.completed += LevelUnLoading_completed;
     }
 
     private void LevelUnLoading_completed(AsyncOperation obj)
     {
-        // restart the scene
-        StartRace();
+    }
+
+    private void ClearCurrentRace()
+    {
+        this.currentRace = null;
     }
 
     private int CalculateRemoval(int totalLaps, int currentLap, int playerCount)

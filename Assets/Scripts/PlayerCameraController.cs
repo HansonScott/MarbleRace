@@ -14,8 +14,7 @@ public class PlayerCameraController : MonoBehaviour
     private Vector3 mouseMovement;
     private float diffX, diffY;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
 
@@ -29,6 +28,8 @@ public class PlayerCameraController : MonoBehaviour
 
     void LateUpdate()
     {
+        if(player == null) { GameObject.Destroy(this.gameObject); }
+
         #region move camera to player position
         // move the camera's focal point position with the sphere's position change
         transform.position = transform.position + (player.transform.position - previousPlayerPosition);

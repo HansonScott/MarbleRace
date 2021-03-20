@@ -162,15 +162,22 @@ public class Race
     internal void RemoveSlowestPlayers(int removeCount)
     {
         // assumption: the racers have already been sorted by their previous lap time
-        for(int i = racers.Count - 1; i >= 0 && removeCount > 0; i--)
+        for (int i = racers.Count - 1; i >= 0 && removeCount > 0; i--)
         {
             racers[i].Sphere.SetActive(false);
 
-            // if the racer has a camera attached to it, remove that one too.
-            racers[i].Sphere.GetComponent<PlayerCameraController>()?.gameObject.SetActive(false);
+            // remove the camera attached to the player, if the player is getting destroyed too.
+            if (racers[i].Sphere.GetComponent<PlayerSphereController>() != null)
+            {
+                GameObject.Destroy(racers[i].Sphere.GetComponent<PlayerSphereController>().playerCameraFocalPoint.gameObject);
+            }
+
+            // destroy the game object entirely
+            GameObject.Destroy(racers[i].Sphere);
 
             // and finally, remove this racer from the group
             racers.RemoveAt(i);
+
             removeCount--;
         }
     }
