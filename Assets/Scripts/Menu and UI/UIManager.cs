@@ -397,7 +397,6 @@ public class UIManager : Singleton<UIManager>
 
             TextMeshProUGUI timeLabel = t3.gameObject.GetComponent<TextMeshProUGUI>();
             timeLabel.text = (r.finishTime - GameManager.Instance.currentRace.StartTime).ToString(TIME_FORMAT);
-
         }
     }
 
