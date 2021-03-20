@@ -775,7 +775,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Track 01
+    - m_Text: TestTrack
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

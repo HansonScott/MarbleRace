@@ -35,6 +35,8 @@ public class GameManager : Singleton<GameManager>
 
     internal void StartRace()
     {
+        currentRace.ResetFinishTimes();
+
         // scene manager to load and show this race
         AsyncOperation levelLoading = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
         currentRace.SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
@@ -134,9 +136,6 @@ public class GameManager : Singleton<GameManager>
         SphereController sc = go.GetComponent<SphereController>();
         if(sc != null)
         {
-            // this doesn't store it to the racer like I thought it would...
-            //sc.FinishTime = DateTime.Now;
-
             currentRace.SetFinishTime(DateTime.Now, go);
             sc.FinishTime = DateTime.Now;
 
@@ -153,6 +152,8 @@ public class GameManager : Singleton<GameManager>
 
             UIManager.Instance.PopulateResultsScreen();
         }
+
+        // race completion is handled in the 'next button' functionality
     }
 
     public void NextButtonPressed()
@@ -173,11 +174,18 @@ public class GameManager : Singleton<GameManager>
             int remove = CalculateRemoval(currentRace.TotalLaps, currentRace.CurrentLap, currentRace.racers.Count);
             currentRace.RemoveSlowestPlayers(remove);
 
+            if(!currentRace.PlayerAmongRacers())
+            {
+                // then we have failed.
+                Debug.Log("Player has been eliminated.  Try again next time!");
+
+                UIManager.Instance.MainMenu();
+            }
+
             // unload the previous track
-            // scene manager to load and show this race
             AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(currentRace.SceneName);
 
-            // this will finish the loading of the level and all subsequent details
+            // this will finish the unloading of the level and all subsequent details
             levelUnLoading.completed += LevelUnLoading_completed;
         }
     }

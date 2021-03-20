@@ -512,6 +512,4 @@ public class UIManager : Singleton<UIManager>
                                             .ToString(TIME_FORMAT);
         }
     }
-
-
 }

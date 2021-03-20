@@ -22,7 +22,7 @@ public class Race
     private float _startDelay;
     public float StartDelay { get { return _startDelay; } }
 
-    private string _sceneName = "Track01";
+    private string _sceneName = String.Empty;
     public string SceneName { get { return _sceneName; } }
     public Vector3 StartingPosition 
     {
@@ -44,6 +44,14 @@ public class Race
     public RaceTypes RaceType
     {
         get { return _raceType; }
+    }
+
+    internal void ResetFinishTimes()
+    {
+        for(int i = 0; i < racers.Count; i++)
+        {
+            racers[i].finishTime = new DateTime();
+        }
     }
 
     public DateTime StartTime;
@@ -86,9 +94,10 @@ public class Race
     {
         switch(trackID)
         {
-            case 0:// "Track01"
+            case 0:// "TestTrack"
             default:
-                return new Vector3(0f, 78f, -215f); // note: this is the combination of both the parent start area, and the start point
+                // search the game object for 'starting point'?
+                return new Vector3(0f, 3f, -14f); // note: this is the combination of both the parent start area, and the start point
         }
     }
     private Vector3 GetFinishPositionByTrackID(int trackID)
@@ -109,9 +118,20 @@ public class Race
     public Race(int trackID, RaceTypes raceTypeID, int lapCount, float startDelay)
     {
         _trackID = trackID;
+        SetSceneNameByTrackID();
         _raceType = raceTypeID;
         _lapCount = lapCount;
         _startDelay = startDelay;
+    }
+
+    private void SetSceneNameByTrackID()
+    {
+        switch(_trackID)
+        {
+            case 0:
+                _sceneName = "TestTrack";
+                break;
+        }
     }
 
     internal void AddPlayer(Racer r)
@@ -145,8 +165,23 @@ public class Race
         for(int i = racers.Count - 1; i >= 0 && removeCount > 0; i--)
         {
             racers[i].Sphere.SetActive(false);
+
+            // if the racer has a camera attached to it, remove that one too.
+            racers[i].Sphere.GetComponent<PlayerCameraController>()?.gameObject.SetActive(false);
+
+            // and finally, remove this racer from the group
             racers.RemoveAt(i);
             removeCount--;
         }
+    }
+
+    internal bool PlayerAmongRacers()
+    {
+        foreach(Racer r in racers)
+        {
+            if(r.Sphere.GetComponent<PlayerSphereController>() != null) { return true; }
+        }
+
+        return false;
     }
 }
