@@ -75,6 +75,7 @@ public class UIManager : Singleton<UIManager>
 
     // playing
     [SerializeField] private TMPro.TextMeshProUGUI TrackHUD_CountDownLabel;
+    [SerializeField] private Animator CountDownAnimator;
 
     // results
     [SerializeField] private TMPro.TextMeshProUGUI resultsTitle;
@@ -466,6 +467,8 @@ public class UIManager : Singleton<UIManager>
         myShinySlider.onValueChanged.AddListener(delegate { MyShinySlider_ValueChanged(); });
         myReflectSlider.onValueChanged.AddListener(delegate { MyReflectSlider_ValueChanged(); });
 
+        CountDownAnimator.SetBool("ShouldShrink", false);
+
         LoadPlayerPrefs();
     }
 
@@ -509,6 +512,12 @@ public class UIManager : Singleton<UIManager>
 
             // and wait a second before doing it again.
             currentTimerValue--;
+
+            if(currentTimerValue == 0)
+            {
+                CountDownAnimator.SetBool("ShouldShrink", true);
+            }
+
             yield return new WaitForSeconds(1);
         }
 
