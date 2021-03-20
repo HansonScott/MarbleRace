@@ -80,6 +80,7 @@ public class UIManager : Singleton<UIManager>
     // results
     [SerializeField] private TMPro.TextMeshProUGUI resultsTitle;
     [SerializeField] private TMPro.TextMeshProUGUI resultsTrack;
+    [SerializeField] private TMPro.TextMeshProUGUI resultsLapXofY;
     [SerializeField] private TMPro.TextMeshProUGUI resultsType;
     [SerializeField] private UnityEngine.UI.ScrollRect resultsGrid;
     [SerializeField] private GameObject resultsRow;
@@ -131,6 +132,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(false);
                 resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
                 resultsType.gameObject.SetActive(false);
                 resultsGrid.gameObject.SetActive(false);
                 nextButton.gameObject.SetActive(false);
@@ -174,6 +176,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(false);
                 resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
                 resultsType.gameObject.SetActive(false);
                 resultsGrid.gameObject.SetActive(false);
                 nextButton.gameObject.SetActive(false);
@@ -217,6 +220,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(false);
                 resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
                 resultsType.gameObject.SetActive(false);
                 resultsGrid.gameObject.SetActive(false);
                 nextButton.gameObject.SetActive(false);
@@ -260,6 +264,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(false);
                 resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
                 resultsType.gameObject.SetActive(false);
                 resultsGrid.gameObject.SetActive(false);
                 nextButton.gameObject.SetActive(false);
@@ -303,6 +308,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(false);
                 resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
                 resultsType.gameObject.SetActive(false);
                 resultsGrid.gameObject.SetActive(false);
                 nextButton.gameObject.SetActive(false);
@@ -348,6 +354,7 @@ public class UIManager : Singleton<UIManager>
 
                 resultsTitle.gameObject.SetActive(true);
                 resultsTrack.gameObject.SetActive(true);
+                resultsLapXofY.gameObject.SetActive(true);
                 resultsType.gameObject.SetActive(true);
                 resultsGrid.gameObject.SetActive(true);
                 nextButton.gameObject.SetActive(true);
@@ -361,6 +368,12 @@ public class UIManager : Singleton<UIManager>
 
     internal void PopulateResultsScreen()
     {
+        // populate the track name, type laps
+        resultsTrack.text = GameManager.Instance.currentRace.SceneName;
+        resultsType.text = GameManager.Instance.currentRace.RaceType.ToString();
+        resultsLapXofY.text = "Lap " + GameManager.Instance.currentRace.CurrentLap + " of " + GameManager.Instance.currentRace.TotalLaps;
+
+
         int verticalAlignment = 250;
         int rowHeight = -40;
         
