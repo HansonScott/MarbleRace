@@ -242,7 +242,14 @@ public class GameManager : Singleton<GameManager>
         //int playersToRemoveThisLap = playersToRemove / lapsLeft;
         //int result = playersToRemoveThisLap;
         //return result;
+        
+        // catch zero denominator
+        if((totalLaps + 1 - currentLap) == 0) { return 0; }
 
-        return ((playerCount - 5) / (totalLaps + 1 - currentLap));
+        int result = ((playerCount - 5) / (totalLaps + 1 - currentLap));
+
+        if(result < 0) { result = 0; }
+
+        return result;
     }
 }
