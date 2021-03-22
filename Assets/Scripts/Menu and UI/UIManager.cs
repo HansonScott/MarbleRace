@@ -40,10 +40,11 @@ public class UIManager : Singleton<UIManager>
 
     #region Menu Controls
     // main menu
+    [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject backgroundCube;
-    [SerializeField] private UnityEngine.UI.Button hostButton;
-    [SerializeField] private UnityEngine.UI.Button joinButton;
-    [SerializeField] private UnityEngine.UI.Button quitButton;
+    //[SerializeField] private UnityEngine.UI.Button hostButton;
+    //[SerializeField] private UnityEngine.UI.Button joinButton;
+    //[SerializeField] private UnityEngine.UI.Button quitButton;
 
     // host
     [SerializeField] private TMPro.TextMeshProUGUI raceTypeLabel;
@@ -97,13 +98,58 @@ public class UIManager : Singleton<UIManager>
         switch(gs)
         {
             case GameStates.TITLE:
+                backgroundCube.SetActive(false);
+
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
+
+                raceTypeLabel.gameObject.SetActive(false);
+                raceTypeDropDown.gameObject.SetActive(false);
+                racetrackLabel.gameObject.SetActive(false);
+                racetrackDropDown.gameObject.SetActive(false);
+                roundCountLabel.gameObject.SetActive(false);
+                roundCountSlider.gameObject.SetActive(false);
+                aiCountLabel.gameObject.SetActive(false);
+                aiCountSlider.gameObject.SetActive(false);
+                allowJoinLabel.gameObject.SetActive(false);
+                allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
+                delayStartLabel.gameObject.SetActive(false);
+                delayStartSlider.gameObject.SetActive(false);
+
+                myNameLabel.gameObject.SetActive(false);
+                myNameInputField.gameObject.SetActive(false);
+                myColorLabel.gameObject.SetActive(false);
+                myColorPicker.gameObject.SetActive(false);
+                myPlayerSphere.gameObject.SetActive(false);
+                myPlayerSphere.SetActive(false);
+                myShineLabel.gameObject.SetActive(false);
+                myShinySlider.gameObject.SetActive(false);
+                myReflectLabel.gameObject.SetActive(false);
+                myReflectSlider.gameObject.SetActive(false);
+
+                backToMainMenuButton.gameObject.SetActive(false);
+                startButton.gameObject.SetActive(false);
+
+                TrackHUD_CountDownLabel.gameObject.SetActive(false);
+
+                resultsTitle.gameObject.SetActive(false);
+                resultsTrack.gameObject.SetActive(false);
+                resultsLapXofY.gameObject.SetActive(false);
+                resultsType.gameObject.SetActive(false);
+                resultsGrid.gameObject.SetActive(false);
+                nextButton.gameObject.SetActive(false);
                 break;
             case GameStates.INTRO:
                 backgroundCube.SetActive(true);
 
-                hostButton.gameObject.SetActive(true);
-                joinButton.gameObject.SetActive(true);
-                quitButton.gameObject.SetActive(true);
+                mainMenuCanvas.SetActive(true);
+                //hostButton.gameObject.SetActive(true);
+                //joinButton.gameObject.SetActive(true);
+                //quitButton.gameObject.SetActive(true);
 
                 raceTypeLabel.gameObject.SetActive(false);
                 raceTypeDropDown.gameObject.SetActive(false);
@@ -147,9 +193,10 @@ public class UIManager : Singleton<UIManager>
             case GameStates.HOSTING:
                 backgroundCube.SetActive(true);
 
-                hostButton.gameObject.SetActive(false);
-                joinButton.gameObject.SetActive(false);
-                quitButton.gameObject.SetActive(false);
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
 
                 raceTypeLabel.gameObject.SetActive(true);
                 raceTypeDropDown.gameObject.SetActive(true);
@@ -193,9 +240,10 @@ public class UIManager : Singleton<UIManager>
             case GameStates.JOINING:
                 backgroundCube.SetActive(true);
 
-                hostButton.gameObject.SetActive(false);
-                joinButton.gameObject.SetActive(false);
-                quitButton.gameObject.SetActive(false);
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
 
                 raceTypeLabel.gameObject.SetActive(false);
                 raceTypeDropDown.gameObject.SetActive(false);
@@ -239,9 +287,10 @@ public class UIManager : Singleton<UIManager>
             case GameStates.STARTING:
                 backgroundCube.SetActive(false);
 
-                hostButton.gameObject.SetActive(false);
-                joinButton.gameObject.SetActive(false);
-                quitButton.gameObject.SetActive(false);
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
 
                 raceTypeLabel.gameObject.SetActive(false);
                 raceTypeDropDown.gameObject.SetActive(false);
@@ -285,9 +334,10 @@ public class UIManager : Singleton<UIManager>
             case GameStates.PLAYING:
                 backgroundCube.SetActive(false);
 
-                hostButton.gameObject.SetActive(false);
-                joinButton.gameObject.SetActive(false);
-                quitButton.gameObject.SetActive(false);
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
 
                 raceTypeLabel.gameObject.SetActive(false);
                 raceTypeDropDown.gameObject.SetActive(false);
@@ -333,9 +383,10 @@ public class UIManager : Singleton<UIManager>
             case GameStates.REVIEWING:
                 backgroundCube.SetActive(true);
 
-                hostButton.gameObject.SetActive(false);
-                joinButton.gameObject.SetActive(false);
-                quitButton.gameObject.SetActive(false);
+                mainMenuCanvas.SetActive(false);
+                //hostButton.gameObject.SetActive(false);
+                //joinButton.gameObject.SetActive(false);
+                //quitButton.gameObject.SetActive(false);
 
                 raceTypeLabel.gameObject.SetActive(false);
                 raceTypeDropDown.gameObject.SetActive(false);
@@ -532,6 +583,8 @@ public class UIManager : Singleton<UIManager>
     {
         // because this is a child class, make sure to call the parent first.
         base.Start();
+
+        CurrentGameState = GameStates.TITLE;
 
         // now we can do things at our class level.
         myColorPicker.onColorChanged += MyColorPicker_onColorChanged;
