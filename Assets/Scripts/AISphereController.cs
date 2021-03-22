@@ -17,10 +17,10 @@ public class AISphereController : SphereController
     // Update is called once per frame
     void Update()
     {
-        if(IsLocalPlayer)
-        {
+        //if(IsLocalPlayer)
+        //{
             HandleMove();
-        }
+        //}
     }
 
     private void HandleMove()

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.UIElements;
+using MLAPI;
 
 public enum GameStates
 {
@@ -464,7 +465,21 @@ public class UIManager : Singleton<UIManager>
 
     public void StartGame()
     {
+        bool isHosting = (CurrentGameState == GameStates.HOSTING);
+
         CurrentGameState = GameStates.STARTING;
+
+        // start the network host (join?)
+        if(isHosting)
+        {
+            // start network host
+            NetworkingManager.Singleton.StartHost();
+        }
+        else
+        {
+            // start network client
+            NetworkingManager.Singleton.StartClient();
+        }
 
         // load settings for the game
         int trackID = racetrackDropDown.value;
