@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.UIElements;
 using MLAPI;
+using System.Net;
 
 public enum GameStates
 {
@@ -55,6 +56,8 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private UnityEngine.UI.Slider aiCountSlider;
     [SerializeField] private TMPro.TextMeshProUGUI allowJoinLabel;
     [SerializeField] private UnityEngine.UI.Toggle allowJoinToggle;
+    [SerializeField] private TMPro.TextMeshProUGUI hostIPLabel;
+    [SerializeField] private TMPro.TextMeshProUGUI hostIPValueLabel;
     [SerializeField] private TMPro.TextMeshProUGUI delayStartLabel;
     [SerializeField] private UnityEngine.UI.Slider delayStartSlider;
 
@@ -112,6 +115,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(false);
                 allowJoinLabel.gameObject.SetActive(false);
                 allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
                 delayStartLabel.gameObject.SetActive(false);
                 delayStartSlider.gameObject.SetActive(false);
 
@@ -156,6 +161,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(true);
                 allowJoinLabel.gameObject.SetActive(true);
                 allowJoinToggle.gameObject.SetActive(true);
+                hostIPLabel.gameObject.SetActive(true);
+                hostIPValueLabel.gameObject.SetActive(true);
                 delayStartLabel.gameObject.SetActive(true);
                 delayStartSlider.gameObject.SetActive(true);
 
@@ -200,6 +207,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(false);
                 allowJoinLabel.gameObject.SetActive(false);
                 allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
                 delayStartLabel.gameObject.SetActive(false);
                 delayStartSlider.gameObject.SetActive(false);
 
@@ -244,6 +253,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(false);
                 allowJoinLabel.gameObject.SetActive(false);
                 allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
                 delayStartLabel.gameObject.SetActive(false);
                 delayStartSlider.gameObject.SetActive(false);
 
@@ -288,6 +299,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(false);
                 allowJoinLabel.gameObject.SetActive(false);
                 allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
                 delayStartLabel.gameObject.SetActive(false);
                 delayStartSlider.gameObject.SetActive(false);
 
@@ -334,6 +347,8 @@ public class UIManager : Singleton<UIManager>
                 aiCountSlider.gameObject.SetActive(false);
                 allowJoinLabel.gameObject.SetActive(false);
                 allowJoinToggle.gameObject.SetActive(false);
+                hostIPLabel.gameObject.SetActive(false);
+                hostIPValueLabel.gameObject.SetActive(false);
                 delayStartLabel.gameObject.SetActive(false);
                 delayStartSlider.gameObject.SetActive(false);
 
@@ -451,6 +466,15 @@ public class UIManager : Singleton<UIManager>
     public void HostGame()
     {
         CurrentGameState = GameStates.HOSTING;
+
+        // populate the host's IP address
+        hostIPValueLabel.text = GetHostIPAddress();
+    }
+
+    private string GetHostIPAddress()
+    {
+        IPHostEntry ipHostEntry = Dns.GetHostEntry(Dns.GetHostName());
+        return ipHostEntry.AddressList[ipHostEntry.AddressList.Length - 1].ToString(); // get the last one (?)
     }
 
     public void JoinGame()
@@ -477,6 +501,10 @@ public class UIManager : Singleton<UIManager>
         }
         else
         {
+            // capture network IP address
+
+            // set the IP into the network UNetTransport.connectAddress variable
+
             // start network client
             NetworkingManager.Singleton.StartClient();
         }
