@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MLAPI;
 
-public class SphereController : MonoBehaviour
+public class SphereController : NetworkedBehaviour
 {
     [SerializeField] protected float speed;
     public string SphereName;

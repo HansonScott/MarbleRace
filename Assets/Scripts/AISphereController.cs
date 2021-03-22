@@ -17,6 +17,14 @@ public class AISphereController : SphereController
     // Update is called once per frame
     void Update()
     {
+        if(IsLocalPlayer)
+        {
+            HandleMove();
+        }
+    }
+
+    private void HandleMove()
+    {
         // if we've finished, stop processing.
         if (this.FinishTime != DateTime.MinValue) { return; }
 

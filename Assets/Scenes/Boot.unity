@@ -10227,7 +10227,7 @@ MonoBehaviour:
       PlayerPrefab: 1
     PlayerPrefabHash:
       Value: 17211080437201729225
-    CreatePlayerPrefab: 1
+    CreatePlayerPrefab: 0
     ReceiveTickrate: 64
     MaxReceiveEventsPerTickRate: 500
     EventTickrate: 64
@@ -10241,7 +10241,7 @@ MonoBehaviour:
     EnableNetworkedVar: 1
     EnsureNetworkedVarLengthSafety: 0
     EnableSceneManagement: 1
-    ForceSamePrefabs: 1
+    ForceSamePrefabs: 0
     UsePrefabSync: 0
     RecycleNetworkIds: 1
     NetworkIdRecycleDelay: 120

@@ -495,8 +495,6 @@ public class UIManager : Singleton<UIManager>
         myShinySlider.onValueChanged.AddListener(delegate { MyShinySlider_ValueChanged(); });
         myReflectSlider.onValueChanged.AddListener(delegate { MyReflectSlider_ValueChanged(); });
 
-        CountDownAnimator.SetBool("ShouldShrink", false);
-
         LoadPlayerPrefs();
     }
 

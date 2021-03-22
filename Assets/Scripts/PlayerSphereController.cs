@@ -16,7 +16,15 @@ public class PlayerSphereController : SphereController
     // Update is called once per frame
     void Update()
     {
-        if(UIManager.Instance.CurrentGameState == GameStates.STARTING ||
+        //if(IsLocalPlayer)
+        //{
+            HandleMove();
+        //}
+    }
+
+    private void HandleMove()
+    {
+        if (UIManager.Instance.CurrentGameState == GameStates.STARTING ||
            UIManager.Instance.CurrentGameState == GameStates.PLAYING)
         {
             // NOTE: we're using the camera's orientation for the movement, not the sphere!
