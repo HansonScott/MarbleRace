@@ -379,9 +379,15 @@ public class UIManager : Singleton<UIManager>
         
         int position = 1;
 
+        int remove = GameManager.Instance.CalculateRemoval(GameManager.Instance.currentRace.TotalLaps, 
+                                                            GameManager.Instance.currentRace.CurrentLap + 1, 
+                                                            GameManager.Instance.currentRace.racers.Count);
+
         // for each racer
-        foreach (Racer r in GameManager.Instance.currentRace.racers)
+        for(int i = 0; i < GameManager.Instance.currentRace.racers.Count; i++)
         {
+            Racer r = GameManager.Instance.currentRace.racers[i];
+
             // instantiate a prefab row into the boot scene (same)
             GameObject newRow = Instantiate(resultsRow);
 
@@ -402,6 +408,7 @@ public class UIManager : Singleton<UIManager>
             Transform t2 = newRow.transform.GetChild(1); // name
             Transform t3 = newRow.transform.GetChild(2); // time
 
+
             TextMeshProUGUI positionLabel = t1.gameObject.GetComponent<TextMeshProUGUI>();
             positionLabel.text = position.ToString();
             position++;
@@ -411,6 +418,14 @@ public class UIManager : Singleton<UIManager>
 
             TextMeshProUGUI timeLabel = t3.gameObject.GetComponent<TextMeshProUGUI>();
             timeLabel.text = (r.finishTime - GameManager.Instance.currentRace.StartTime).ToString(TIME_FORMAT);
+
+            bool shouldShowRed = (i >= (GameManager.Instance.currentRace.racers.Count - remove));
+            if (shouldShowRed)
+            {
+                positionLabel.color = Color.red;
+                nameLabel.color = Color.red;
+                timeLabel.color = Color.red;
+            }
         }
     }
 

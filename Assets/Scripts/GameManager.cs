@@ -234,7 +234,7 @@ public class GameManager : Singleton<GameManager>
         this.currentRace = null;
     }
 
-    private int CalculateRemoval(int totalLaps, int currentLap, int playerCount)
+    public int CalculateRemoval(int totalLaps, int currentLap, int playerCount)
     {
         // theory - linearly remove some on each lap until 5 are left on last lap
         //int lapsLeft = totalLaps - currentLap;
