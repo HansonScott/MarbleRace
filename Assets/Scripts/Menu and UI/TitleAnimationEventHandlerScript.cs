@@ -7,6 +7,6 @@ public class TitleAnimationEventHandlerScript : MonoBehaviour
     public void HandleAnimationEnd()
     {
         //Debug.Log("Animation ended.");
-        UIManager.Instance.MainMenu();
+        GameManager.Instance.MainMenu();
     }
 }

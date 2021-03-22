@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TrackManager : MonoBehaviour
@@ -8,7 +7,6 @@ public class TrackManager : MonoBehaviour
     public float StartDelay;
 
     [SerializeField] private GameObject StartWall;
-    //[SerializeField] private float startWallDropDistance;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +23,7 @@ public class TrackManager : MonoBehaviour
 
         StartWall.transform.Translate(Vector3.down * StartWall.transform.localScale.y);
 
-        GameManager.Instance.currentRace.StartTime = DateTime.Now;
+        GameManager.Instance.CurrentRace.StartTime = DateTime.Now;
     }
 
 }

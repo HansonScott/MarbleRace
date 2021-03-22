@@ -15,7 +15,7 @@ public class SphereController : NetworkedBehaviour
     void FixedUpdate()
     {
         // if fell too far down, start over.
-        if(this.gameObject.transform.position.y < (GameManager.Instance.currentRace.FinishPosition.y - 20))
-        { this.gameObject.transform.position = GameManager.Instance.currentRace.StartingPosition; }
+        if(this.gameObject.transform.position.y < (GameManager.Instance.CurrentRace.FinishPosition.y - 20))
+        { this.gameObject.transform.position = GameManager.Instance.CurrentRace.StartingPosition; }
     }
 }

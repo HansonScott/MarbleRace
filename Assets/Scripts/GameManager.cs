@@ -2,17 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using MLAPI;
+using System.Net;
 
 public class GameManager : Singleton<GameManager>
 {
-    [SerializeField] private UIManager uiManager;
-
     [SerializeField] private PlayerSphereController playerPrefab;
     [SerializeField] private AISphereController aiPrefab;
     [SerializeField] private PlayerCameraController playerCameraControllerPrefab;
     private FinishLineHandler finishLinePrefab;
 
-    public Race currentRace;
+    private GameStates _gameState = GameStates.TITLE;
+    public GameStates CurrentGameState
+    {
+        get { return _gameState; }
+    }
+    public void SetCurrentGameState(GameStates s)
+    {
+        _gameState = s;
+        UIManager.Instance.UpdateUIFromGameState(_gameState);
+    }
+
+    public Race CurrentRace { get; private set; }
 
     // Start is called before the first frame update
     public override void Start()
@@ -20,46 +31,148 @@ public class GameManager : Singleton<GameManager>
         base.Start();
     }
 
-    internal Race CreateNewRace(int trackID, RaceTypes raceTypeID, int lapCount, float aICount, float startDelay)
+    #region State changes from menu
+    public void MainMenu()
     {
-        Race r = new Race(trackID, raceTypeID, lapCount, startDelay);
+        SetCurrentGameState(GameStates.INTRO);
+    }
+    public void HostGame()
+    {
+        SetCurrentGameState(GameStates.HOSTING);
 
-        for (int i = 0; i < aICount; i++)
+        // populate the host's IP address
+        UIManager.Instance.SetIPValue(GetHostIPAddress());
+    }
+    public void JoinGame()
+    {
+        SetCurrentGameState(GameStates.JOINING);
+    }
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+    public void StartGame()
+    {
+        bool isHosting = (CurrentGameState == GameStates.HOSTING);
+        SetCurrentGameState(GameStates.STARTING);
+
+        // start the network host (join?)
+        if (isHosting)
+        {
+            // start network host
+            NetworkingManager.Singleton.StartHost();
+        }
+        else
+        {
+            // capture network IP address
+
+            // set the IP into the network UNetTransport.connectAddress variable
+
+            // start network client
+            NetworkingManager.Singleton.StartClient();
+        }
+
+        CreateNewRaceFromUIInfo();
+        StartNewRaceScene();
+    }
+
+    private void CreateNewRaceFromUIInfo()
+    {
+        // gather general race info
+        RaceInfo ri = UIManager.Instance.GetRaceInfo();
+        Race thisRace = GameManager.Instance.CreateNewRaceFromUIInfo(ri);
+
+        // gather settings and add this player
+        PlayerInfo pi = UIManager.Instance.GetPlayerInfo();
+        Racer thisRacer = new Racer(pi.Name, pi.Color, pi.Shine, pi.Reflect, true);
+        thisRace.AddPlayer(thisRacer);
+
+        GameManager.Instance.CurrentRace = thisRace;
+    }
+    #endregion
+
+    private string GetHostIPAddress()
+    {
+        IPHostEntry ipHostEntry = Dns.GetHostEntry(Dns.GetHostName());
+        return ipHostEntry.AddressList[ipHostEntry.AddressList.Length - 1].ToString(); // get the last one (?)
+    }
+
+    #region Starting a new race
+    internal Race CreateNewRaceFromUIInfo(RaceInfo info)
+    {
+        Race r = new Race(info.TrackID, info.RaceTypeID, info.LapCount, info.StartDelay);
+
+        for (int i = 0; i < info.AICount; i++)
         {
             r.AddPlayer();
         }
 
-        currentRace = r;
+        CurrentRace = r;
         return r;
     }
-
-    internal void StartRace()
+    internal void StartNewRaceScene()
     {
-        currentRace.ResetFinishTimes();
+        CurrentRace.ResetFinishTimes();
 
         // scene manager to load and show this race
         AsyncOperation levelLoading = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
-        currentRace.SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+        CurrentRace.SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
         // this will finish the loading of the level and all subsequent details
         levelLoading.completed += LevelLoading_completed;
     }
-
     private void LevelLoading_completed(AsyncOperation obj)
     {
         // now that the scene has loaded, then we can add players to it
-        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(currentRace.SceneName);
+        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(CurrentRace.SceneName);
 
         // set this scene as active, so we can add players to it.
         UnityEngine.SceneManagement.SceneManager.SetActiveScene(levelScene);
 
+        List<GameObject> playersToAdjust = AddPlayerObjectsToRaceScene();
+        AdjustRaceBasedOnRaceType(playersToAdjust);
+
+        // hook up the finish line event trigger
+        finishLinePrefab = GameObject.FindObjectOfType<FinishLineHandler>();
+        finishLinePrefab.onPlayerFinished.AddListener(FinishLineHit);
+
+        // hook up the start delay timer
+        TrackManager tm = GameObject.FindObjectOfType<TrackManager>();
+        tm.StartDelay = CurrentRace.StartDelay;
+
+        SetCurrentGameState(GameStates.STARTING);
+
+        // start the UI countdown once everthing has loaded.
+        UIManager.Instance.StartCountDown(CurrentRace.StartDelay);
+    }
+
+    private void AdjustRaceBasedOnRaceType(List<GameObject> playersToAdjust)
+    {
+        if (CurrentRace.RaceType == RaceTypes.PureSpeed)
+        {
+            // for the pure speed race type, disable all collisions between players
+            for (int i = 0; i < playersToAdjust.Count; i++)
+            {
+                for (int j = 0; j < playersToAdjust.Count; j++)
+                {
+                    if (i == j) { continue; } //don't bother with self
+
+                    Physics.IgnoreCollision(playersToAdjust[i].GetComponent<Collider>(),
+                                            playersToAdjust[j].GetComponent<Collider>(), true);
+                }
+            }
+        }
+    }
+
+    private List<GameObject> AddPlayerObjectsToRaceScene()
+    {
         // reference all the game objects, for the collision adjustment depending on track type
         List<GameObject> playersToAdjust = new List<GameObject>();
 
         // place all players in starting area of the race
-        for (int i = 0; i < currentRace.racers.Count; i++)
+        for (int i = 0; i < CurrentRace.racers.Count; i++)
         {
-            Racer r = currentRace.racers[i];
+            Racer r = CurrentRace.racers[i];
 
             if (r.isUserControlled)
             {
@@ -79,7 +192,7 @@ public class GameManager : Singleton<GameManager>
                 r.ApplyAppearanceToGameObject(player.gameObject);
 
                 // set location to start location
-                SetStartingPosition(player, currentRace.StartingPosition, i);
+                SetStartingPosition(player, CurrentRace.StartingPosition, i);
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject);
@@ -95,47 +208,21 @@ public class GameManager : Singleton<GameManager>
                 player.SphereName = r.Name;
 
                 // set location to start location
-                SetStartingPosition(player, currentRace.StartingPosition, i);
+                SetStartingPosition(player, CurrentRace.StartingPosition, i);
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject);
             }
         } // end for
 
-        if(currentRace.RaceType == RaceTypes.PureSpeed)
-        {
-            // for the pure speed race type, disable all collisions between players
-            for(int i = 0; i < playersToAdjust.Count; i++)
-            {
-                for (int j = 0; j < playersToAdjust.Count; j++)
-                {
-                    if(i == j) { continue; } //don't bother with self
-
-                    Physics.IgnoreCollision(playersToAdjust[i].GetComponent<Collider>(),
-                                            playersToAdjust[j].GetComponent<Collider>(), true);
-                }
-            }
-        }
-
-        // hook up the finish line event trigger
-        finishLinePrefab = GameObject.FindObjectOfType<FinishLineHandler>();
-        finishLinePrefab.onPlayerFinished.AddListener(FinishLineHit);
-
-        // hook up the start delay timer
-        TrackManager tm = GameObject.FindObjectOfType<TrackManager>();
-        tm.StartDelay = currentRace.StartDelay;
-
-        UIManager.Instance.CurrentGameState = GameStates.STARTING;
-
-        // start the UI countdown once everthing has loaded.
-        UIManager.Instance.StartCountDown(currentRace.StartDelay);
+        return playersToAdjust;
     }
 
     private void SetStartingPosition(SphereController player, Vector3 trackStartingPosition, int positionOrder)
     {
         Vector3 actualStartingPosition = trackStartingPosition;
 
-        if (currentRace.RaceType != RaceTypes.PureSpeed)
+        if (CurrentRace.RaceType != RaceTypes.PureSpeed)
         {
             // defaults in first place
             if (positionOrder > 0)
@@ -156,25 +243,27 @@ public class GameManager : Singleton<GameManager>
         }
         player.transform.position = actualStartingPosition;
     }
+    #endregion
 
+    #region Finishing a Lap/Race
     private void FinishLineHit(GameObject go)
     {
         SphereController sc = go.GetComponent<SphereController>();
         if(sc != null)
         {
-            currentRace.SetFinishTime(DateTime.Now, go);
+            CurrentRace.SetFinishTime(DateTime.Now, go);
             sc.FinishTime = DateTime.Now;
 
             Debug.Log(sc.SphereName + " finished in " +
-                (sc.FinishTime - currentRace.StartTime).ToString(UIManager.TIME_FORMAT));
+                (sc.FinishTime - CurrentRace.StartTime).ToString(UIManager.TIME_FORMAT));
         }
 
-        if (currentRace.IsLapComplete)
+        if (CurrentRace.IsLapComplete)
         {
-            UIManager.Instance.CurrentGameState = GameStates.REVIEWING;
+            SetCurrentGameState(GameStates.REVIEWING);
 
             // sort the racers by their finishTime
-            currentRace.racers.Sort((r1, r2) => r1.finishTime.CompareTo(r2.finishTime));
+            CurrentRace.racers.Sort((r1, r2) => r1.finishTime.CompareTo(r2.finishTime));
 
             UIManager.Instance.PopulateResultsScreen();
         }
@@ -185,7 +274,7 @@ public class GameManager : Singleton<GameManager>
     public void NextButtonPressed()
     {
         // advance the lap
-        currentRace.AdanceLap();
+        CurrentRace.AdanceLap();
 
         // clear out results grid
         UIManager.Instance.ClearResultsScreen();
@@ -194,16 +283,16 @@ public class GameManager : Singleton<GameManager>
         UnloadCurrentLevel();
 
         // if we're not done, then figure out next lap
-        if (!currentRace.isRaceComplete)
+        if (!CurrentRace.isRaceComplete)
         {
             // calculate players to remove from the list
-            int remove = CalculateRemoval(currentRace.TotalLaps, currentRace.CurrentLap, currentRace.racers.Count);
-            currentRace.RemoveSlowestPlayers(remove);
+            int remove = CalculateRemoval(CurrentRace.TotalLaps, CurrentRace.CurrentLap, CurrentRace.racers.Count);
+            CurrentRace.RemoveSlowestPlayers(remove);
 
-            if (currentRace.PlayerAmongRacers())
+            if (CurrentRace.PlayerAmongRacers())
             {
                 // restart the scene for the next lap
-                StartRace();
+                StartNewRaceScene();
                 return;
             }
             else
@@ -214,12 +303,12 @@ public class GameManager : Singleton<GameManager>
 
         // then we have failed or it's the end of this race entirely.
         ClearCurrentRace();
-        UIManager.Instance.MainMenu();
+        MainMenu();
     }
     private void UnloadCurrentLevel()
     {
         // unload the previous track
-        AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(currentRace.SceneName);
+        AsyncOperation levelUnLoading = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(CurrentRace.SceneName);
 
         // this will finish the unloading of the level and all subsequent details
         levelUnLoading.completed += LevelUnLoading_completed;
@@ -231,7 +320,7 @@ public class GameManager : Singleton<GameManager>
 
     private void ClearCurrentRace()
     {
-        this.currentRace = null;
+        this.CurrentRace = null;
     }
 
     public int CalculateRemoval(int totalLaps, int currentLap, int playerCount)
@@ -252,4 +341,5 @@ public class GameManager : Singleton<GameManager>
 
         return result;
     }
+    #endregion
 }

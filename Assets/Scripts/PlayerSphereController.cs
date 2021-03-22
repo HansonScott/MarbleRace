@@ -24,8 +24,8 @@ public class PlayerSphereController : SphereController
 
     private void HandleMove()
     {
-        if (UIManager.Instance.CurrentGameState == GameStates.STARTING ||
-           UIManager.Instance.CurrentGameState == GameStates.PLAYING)
+        if (GameManager.Instance.CurrentGameState == GameStates.STARTING ||
+           GameManager.Instance.CurrentGameState == GameStates.PLAYING)
         {
             // NOTE: we're using the camera's orientation for the movement, not the sphere!
             float vInput = Input.GetAxis("Vertical");

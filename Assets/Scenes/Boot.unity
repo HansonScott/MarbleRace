@@ -1601,7 +1601,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &382829639
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1857,7 +1857,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5163666835b92704ba53d7a84fea81cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiManager: {fileID: 1564243409}
   playerPrefab: {fileID: 7150721208980433137, guid: 340185134b10ad9448c62f35e14c2753,
     type: 3}
   aiPrefab: {fileID: 2776652783963098905, guid: 8d9477f330cee264e85051ad23978e9e,
@@ -4487,7 +4486,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: MainMenu
         m_Mode: 1
         m_Arguments:
@@ -4895,7 +4894,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: JoinGame
         m_Mode: 1
         m_Arguments:
@@ -6209,7 +6208,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
@@ -6957,7 +6956,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: MainMenu
         m_Mode: 1
         m_Arguments:
@@ -8641,7 +8640,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed9adbfdd9a03074fac6db6f9d2cbebf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 453486890}
   mainMenuCanvas: {fileID: 2116702619}
   backgroundCube: {fileID: 570349839}
   hostScreen: {fileID: 1896473972}
@@ -8767,7 +8765,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: QuitGame
         m_Mode: 1
         m_Arguments:
@@ -9609,7 +9607,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: HostGame
         m_Mode: 1
         m_Arguments:
@@ -10567,7 +10565,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564243409}
+      - m_Target: {fileID: 453486890}
         m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:

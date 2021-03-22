@@ -2,8 +2,6 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using MLAPI;
-using System.Net;
 
 public enum GameStates
 {
@@ -19,23 +17,10 @@ public enum GameStates
 
 public class UIManager : Singleton<UIManager>
 {
-    private GameStates _gameState = GameStates.TITLE;
-    public GameStates CurrentGameState
-    {
-        get { return _gameState; }
-        set { 
-            _gameState = value; 
-            UpdateUIFromGameState(_gameState); 
-        }
-    }
-
-    [SerializeField] private GameManager gameManager;
-
-    private float currentTimerValue;
-
     public const string TIME_FORMAT = "mm\\:ss\\:ff";
+    private float _currentTimerValue;
 
-    #region Menu Controls
+    #region Menu Controls and Navigation
     // main menu
     [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject backgroundCube;
@@ -75,10 +60,38 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TMPro.TextMeshProUGUI resultsLapXofY;
     [SerializeField] private TMPro.TextMeshProUGUI resultsType;
     [SerializeField] private UnityEngine.UI.ScrollRect resultsGrid;
-    [SerializeField] private GameObject resultsRow;
-    #endregion
 
-    private void UpdateUIFromGameState(GameStates gs)
+    internal RaceInfo GetRaceInfo()
+    {
+        RaceInfo result = new RaceInfo();
+        result.TrackID = racetrackDropDown.value;
+        result.RaceTypeID = (RaceTypes)Enum.Parse(typeof(RaceTypes), raceTypeDropDown.value.ToString());
+        result.LapCount = (int)roundCountSlider.value;
+        result.AICount = aiCountSlider.value;
+        result.StartDelay = delayStartSlider.value;
+
+        return result;
+    }
+
+    internal PlayerInfo GetPlayerInfo()
+    {
+        PlayerInfo result = new PlayerInfo();
+        result.Name = myNameInputField.text;
+        result.Color = myColorPicker.color;
+        result.Shine = myShinySlider.value;
+        result.Reflect = myReflectSlider.value;
+
+        return result;
+    }
+
+    [SerializeField] private GameObject resultsRow;
+
+    internal void SetIPValue(string value)
+    {
+        hostIPValueLabel.text = value;
+    }
+
+    public void UpdateUIFromGameState(GameStates gs)
     {
         switch(gs)
         {
@@ -159,159 +172,12 @@ public class UIManager : Singleton<UIManager>
                 break;
         }
     }
-
-    internal void PopulateResultsScreen()
-    {
-        // populate the track name, type laps
-        resultsTrack.text = GameManager.Instance.currentRace.SceneName;
-        resultsType.text = GameManager.Instance.currentRace.RaceType.ToString();
-        resultsLapXofY.text = "Lap " + GameManager.Instance.currentRace.CurrentLap + " of " + GameManager.Instance.currentRace.TotalLaps;
-
-
-        int verticalAlignment = 250;
-        int rowHeight = -40;
-        
-        int position = 1;
-
-        int remove = GameManager.Instance.CalculateRemoval(GameManager.Instance.currentRace.TotalLaps, 
-                                                            GameManager.Instance.currentRace.CurrentLap + 1, 
-                                                            GameManager.Instance.currentRace.racers.Count);
-
-        // for each racer
-        for(int i = 0; i < GameManager.Instance.currentRace.racers.Count; i++)
-        {
-            Racer r = GameManager.Instance.currentRace.racers[i];
-
-            // instantiate a prefab row into the boot scene (same)
-            GameObject newRow = Instantiate(resultsRow);
-
-            // assign the row to the grid as a child
-            Transform viewport = resultsGrid.transform.GetChild(0);
-            Transform content = viewport.GetChild(0);
-
-            newRow.transform.SetParent(content);
-
-            // align the row to be precisely placed below previous ones
-            newRow.transform.position = new Vector3(470, verticalAlignment, 0);
-
-            // and set the alignment for the next one
-            verticalAlignment += rowHeight;
-
-            // populate the prefab row with position, name, and time.
-            Transform t1 = newRow.transform.GetChild(0); // position
-            Transform t2 = newRow.transform.GetChild(1); // name
-            Transform t3 = newRow.transform.GetChild(2); // time
-
-
-            TextMeshProUGUI positionLabel = t1.gameObject.GetComponent<TextMeshProUGUI>();
-            positionLabel.text = position.ToString();
-            position++;
-
-            TextMeshProUGUI nameLabel = t2.gameObject.GetComponent<TextMeshProUGUI>();
-            nameLabel.text = r.Name;
-
-            TextMeshProUGUI timeLabel = t3.gameObject.GetComponent<TextMeshProUGUI>();
-            timeLabel.text = (r.finishTime - GameManager.Instance.currentRace.StartTime).ToString(TIME_FORMAT);
-
-            bool shouldShowRed = (i >= (GameManager.Instance.currentRace.racers.Count - remove));
-            if (shouldShowRed)
-            {
-                positionLabel.color = Color.red;
-                nameLabel.color = Color.red;
-                timeLabel.color = Color.red;
-            }
-        }
-    }
-
-    internal void ClearResultsScreen()
-    {
-        // assign the row to the grid as a child
-        Transform viewport = resultsGrid.transform.GetChild(0);
-        Transform content = viewport.GetChild(0);
-        GameObject[] rows = GameObject.FindGameObjectsWithTag("ResultsGridRow");
-        for(int i = 0; i < rows.Length; i++)
-        {
-            GameObject.Destroy(rows[i]);
-        }        
-    }
-
-    #region public gameState changes
-    public void MainMenu()
-    {
-        CurrentGameState = GameStates.INTRO;
-    }
-
-    public void HostGame()
-    {
-        CurrentGameState = GameStates.HOSTING;
-
-        // populate the host's IP address
-        hostIPValueLabel.text = GetHostIPAddress();
-    }
-
-    private string GetHostIPAddress()
-    {
-        IPHostEntry ipHostEntry = Dns.GetHostEntry(Dns.GetHostName());
-        return ipHostEntry.AddressList[ipHostEntry.AddressList.Length - 1].ToString(); // get the last one (?)
-    }
-
-    public void JoinGame()
-    {
-        CurrentGameState = GameStates.JOINING;
-    }
-
-    public void QuitGame()
-    {
-        Application.Quit();
-    }
-
-    public void StartGame()
-    {
-        bool isHosting = (CurrentGameState == GameStates.HOSTING);
-
-        CurrentGameState = GameStates.STARTING;
-
-        // start the network host (join?)
-        if(isHosting)
-        {
-            // start network host
-            NetworkingManager.Singleton.StartHost();
-        }
-        else
-        {
-            // capture network IP address
-
-            // set the IP into the network UNetTransport.connectAddress variable
-
-            // start network client
-            NetworkingManager.Singleton.StartClient();
-        }
-
-        // load settings for the game
-        int trackID = racetrackDropDown.value;
-        int raceTypeID = raceTypeDropDown.value;
-        int lapCount = (int)roundCountSlider.value;
-        float AICount = aiCountSlider.value;
-        float delay = delayStartSlider.value;
-
-        Race thisRace = GameManager.Instance.CreateNewRace(trackID, (RaceTypes)Enum.Parse(typeof(RaceTypes), raceTypeID.ToString()), lapCount, AICount, delay);
-        GameManager.Instance.currentRace = thisRace;
-
-        // capture this player settings
-        Racer thisRacer = new Racer(myNameInputField.text, myColorPicker.color, myShinySlider.value, myReflectSlider.value, true);
-
-        thisRace.AddPlayer(thisRacer);
-
-        GameManager.Instance.StartRace();
-    }
     #endregion
 
     public override void Start()
     {
         // because this is a child class, make sure to call the parent first.
         base.Start();
-
-        CurrentGameState = GameStates.TITLE;
 
         // now we can do things at our class level.
         myColorPicker.onColorChanged += MyColorPicker_onColorChanged;
@@ -343,9 +209,10 @@ public class UIManager : Singleton<UIManager>
     }
     #endregion
 
+    #region During play - HUD
     internal void StartCountDown(float timeInSeconds)
     {
-        currentTimerValue = timeInSeconds;
+        _currentTimerValue = timeInSeconds;
 
         StartCoroutine(UpdateCountdown());
     }
@@ -354,15 +221,15 @@ public class UIManager : Singleton<UIManager>
     {
         TrackHUD_CountDownLabel.gameObject.SetActive(true);
 
-        while (currentTimerValue >= 0)
+        while (_currentTimerValue >= 0)
         {
             // update UI label with new value
-            TrackHUD_CountDownLabel.text = currentTimerValue.ToString();
+            TrackHUD_CountDownLabel.text = _currentTimerValue.ToString();
 
             // and wait a second before doing it again.
-            currentTimerValue--;
+            _currentTimerValue--;
 
-            if(currentTimerValue == 0)
+            if(_currentTimerValue == 0)
             {
                 CountDownAnimator.SetBool("ShouldShrink", true);
             }
@@ -370,15 +237,94 @@ public class UIManager : Singleton<UIManager>
             yield return new WaitForSeconds(1);
         }
 
-        CurrentGameState = GameStates.PLAYING;
+        GameManager.Instance.SetCurrentGameState(GameStates.PLAYING);
     }
 
     private void Update()
     {
-        if(CurrentGameState == GameStates.PLAYING)
+        if(GameManager.Instance.CurrentGameState == GameStates.PLAYING)
         {
-            TrackHUD_CountDownLabel.text = (DateTime.Now - GameManager.Instance.currentRace.StartTime)
+            TrackHUD_CountDownLabel.text = (DateTime.Now - GameManager.Instance.CurrentRace.StartTime)
                                             .ToString(TIME_FORMAT);
         }
     }
+    #endregion
+
+    #region Post-play
+    internal void PopulateResultsScreen()
+    {
+        // populate the track name, type laps
+        resultsTrack.text = GameManager.Instance.CurrentRace.SceneName;
+        resultsType.text = GameManager.Instance.CurrentRace.RaceType.ToString();
+        resultsLapXofY.text = "Lap " + GameManager.Instance.CurrentRace.CurrentLap + " of " + GameManager.Instance.CurrentRace.TotalLaps;
+
+
+        int verticalAlignment = 250;
+        int rowHeight = -40;
+
+        int position = 1;
+
+        int remove = GameManager.Instance.CalculateRemoval(GameManager.Instance.CurrentRace.TotalLaps,
+                                                            GameManager.Instance.CurrentRace.CurrentLap + 1,
+                                                            GameManager.Instance.CurrentRace.racers.Count);
+
+        // for each racer
+        for (int i = 0; i < GameManager.Instance.CurrentRace.racers.Count; i++)
+        {
+            Racer r = GameManager.Instance.CurrentRace.racers[i];
+
+            // instantiate a prefab row into the boot scene (same)
+            GameObject newRow = Instantiate(resultsRow);
+
+            // assign the row to the grid as a child
+            Transform viewport = resultsGrid.transform.GetChild(0);
+            Transform content = viewport.GetChild(0);
+
+            newRow.transform.SetParent(content);
+
+            // align the row to be precisely placed below previous ones
+            newRow.transform.position = new Vector3(470, verticalAlignment, 0);
+
+            // and set the alignment for the next one
+            verticalAlignment += rowHeight;
+
+            // populate the prefab row with position, name, and time.
+            Transform t1 = newRow.transform.GetChild(0); // position
+            Transform t2 = newRow.transform.GetChild(1); // name
+            Transform t3 = newRow.transform.GetChild(2); // time
+
+
+            TextMeshProUGUI positionLabel = t1.gameObject.GetComponent<TextMeshProUGUI>();
+            positionLabel.text = position.ToString();
+            position++;
+
+            TextMeshProUGUI nameLabel = t2.gameObject.GetComponent<TextMeshProUGUI>();
+            nameLabel.text = r.Name;
+
+            TextMeshProUGUI timeLabel = t3.gameObject.GetComponent<TextMeshProUGUI>();
+            timeLabel.text = (r.finishTime - GameManager.Instance.CurrentRace.StartTime).ToString(TIME_FORMAT);
+
+            bool shouldShowRed = (i >= (GameManager.Instance.CurrentRace.racers.Count - remove));
+            if (shouldShowRed)
+            {
+                positionLabel.color = Color.red;
+                nameLabel.color = Color.red;
+                timeLabel.color = Color.red;
+            }
+        }
+    }
+
+    internal void ClearResultsScreen()
+    {
+        // assign the row to the grid as a child
+        Transform viewport = resultsGrid.transform.GetChild(0);
+        Transform content = viewport.GetChild(0);
+        GameObject[] rows = GameObject.FindGameObjectsWithTag("ResultsGridRow");
+        for (int i = 0; i < rows.Length; i++)
+        {
+            GameObject.Destroy(rows[i]);
+        }
+    }
+
+    #endregion
 }
