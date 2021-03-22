@@ -79,7 +79,7 @@ public class GameManager : Singleton<GameManager>
                 r.ApplyAppearanceToGameObject(player.gameObject);
 
                 // set location to start location
-                player.transform.position = currentRace.StartingPosition;
+                SetStartingPosition(player, currentRace.StartingPosition, i);
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject);
@@ -95,7 +95,7 @@ public class GameManager : Singleton<GameManager>
                 player.SphereName = r.Name;
 
                 // set location to start location
-                player.transform.position = currentRace.StartingPosition;
+                SetStartingPosition(player, currentRace.StartingPosition, i);
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject);
@@ -129,6 +129,32 @@ public class GameManager : Singleton<GameManager>
 
         // start the UI countdown once everthing has loaded.
         UIManager.Instance.StartCountDown(currentRace.StartDelay);
+    }
+
+    private void SetStartingPosition(SphereController player, Vector3 trackStartingPosition, int positionOrder)
+    {
+        Vector3 actualStartingPosition = trackStartingPosition;
+
+        if (currentRace.RaceType != RaceTypes.PureSpeed)
+        {
+            // defaults in first place
+            if (positionOrder > 0)
+            {
+                float sphereWidth = 1;
+
+                while (positionOrder > 10)
+                {
+                    // wrap around to the next row
+                    actualStartingPosition.z -= sphereWidth;
+                    positionOrder -= 10;
+                }
+
+                float xMove = (sphereWidth * ((positionOrder + 1) / 2));
+                if (positionOrder % 2 == 1) { xMove = -xMove; } // switch sides every other postion
+                actualStartingPosition.x += xMove;
+            }
+        }
+        player.transform.position = actualStartingPosition;
     }
 
     private void FinishLineHit(GameObject go)
