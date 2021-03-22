@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using UnityEngine.UIElements;
 using MLAPI;
 using System.Net;
 
@@ -42,55 +39,43 @@ public class UIManager : Singleton<UIManager>
     // main menu
     [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject backgroundCube;
-    //[SerializeField] private UnityEngine.UI.Button hostButton;
-    //[SerializeField] private UnityEngine.UI.Button joinButton;
-    //[SerializeField] private UnityEngine.UI.Button quitButton;
 
-    // host
-    [SerializeField] private TMPro.TextMeshProUGUI raceTypeLabel;
+    // host Screen
+    [SerializeField] private GameObject hostScreen;
     [SerializeField] private TMPro.TMP_Dropdown raceTypeDropDown;
-    [SerializeField] private TMPro.TextMeshProUGUI racetrackLabel;
     [SerializeField] private TMPro.TMP_Dropdown racetrackDropDown;
-    [SerializeField] private TMPro.TextMeshProUGUI roundCountLabel;
     [SerializeField] private UnityEngine.UI.Slider roundCountSlider;
-    [SerializeField] private TMPro.TextMeshProUGUI aiCountLabel;
     [SerializeField] private UnityEngine.UI.Slider aiCountSlider;
-    [SerializeField] private TMPro.TextMeshProUGUI allowJoinLabel;
-    [SerializeField] private UnityEngine.UI.Toggle allowJoinToggle;
-    [SerializeField] private TMPro.TextMeshProUGUI hostIPLabel;
     [SerializeField] private TMPro.TextMeshProUGUI hostIPValueLabel;
-    [SerializeField] private TMPro.TextMeshProUGUI delayStartLabel;
     [SerializeField] private UnityEngine.UI.Slider delayStartSlider;
 
-    // join?
-
     // my player settings
-    [SerializeField] private TMPro.TextMeshProUGUI myNameLabel;
+    [SerializeField] private GameObject myPlayerSettings;
     [SerializeField] private TMPro.TMP_InputField myNameInputField;
-    [SerializeField] private TMPro.TextMeshProUGUI myColorLabel;
     [SerializeField] private ColorPicker myColorPicker;
     [SerializeField] private GameObject myPlayerSphere;
-    [SerializeField] private TMPro.TextMeshProUGUI myShineLabel;
     [SerializeField] private UnityEngine.UI.Slider myShinySlider;
-    [SerializeField] private TMPro.TextMeshProUGUI myReflectLabel;
     [SerializeField] private UnityEngine.UI.Slider myReflectSlider;
 
     [SerializeField] private UnityEngine.UI.Button backToMainMenuButton;
     [SerializeField] private UnityEngine.UI.Button startButton;
+
+    // join
+    [SerializeField] private GameObject joinScreen;
+    [SerializeField] private TMPro.TMP_InputField joinIPField;
 
     // playing
     [SerializeField] private TMPro.TextMeshProUGUI TrackHUD_CountDownLabel;
     [SerializeField] private Animator CountDownAnimator;
 
     // results
+    [SerializeField] private GameObject resultsScreen;
     [SerializeField] private TMPro.TextMeshProUGUI resultsTitle;
     [SerializeField] private TMPro.TextMeshProUGUI resultsTrack;
     [SerializeField] private TMPro.TextMeshProUGUI resultsLapXofY;
     [SerializeField] private TMPro.TextMeshProUGUI resultsType;
     [SerializeField] private UnityEngine.UI.ScrollRect resultsGrid;
     [SerializeField] private GameObject resultsRow;
-    [SerializeField] private UnityEngine.UI.Button nextButton;
-
     #endregion
 
     private void UpdateUIFromGameState(GameStates gs)
@@ -99,333 +84,75 @@ public class UIManager : Singleton<UIManager>
         {
             case GameStates.TITLE:
                 backgroundCube.SetActive(false);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(false);
-                myNameInputField.gameObject.SetActive(false);
-                myColorLabel.gameObject.SetActive(false);
-                myColorPicker.gameObject.SetActive(false);
-                myPlayerSphere.gameObject.SetActive(false);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(false);
                 myPlayerSphere.SetActive(false);
-                myShineLabel.gameObject.SetActive(false);
-                myShinySlider.gameObject.SetActive(false);
-                myReflectLabel.gameObject.SetActive(false);
-                myReflectSlider.gameObject.SetActive(false);
-
-                backToMainMenuButton.gameObject.SetActive(false);
-                startButton.gameObject.SetActive(false);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(false);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.INTRO:
                 backgroundCube.SetActive(true);
-
                 mainMenuCanvas.SetActive(true);
-                //hostButton.gameObject.SetActive(true);
-                //joinButton.gameObject.SetActive(true);
-                //quitButton.gameObject.SetActive(true);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(false);
-                myNameInputField.gameObject.SetActive(false);
-                myColorLabel.gameObject.SetActive(false);
-                myColorPicker.gameObject.SetActive(false);
-                myPlayerSphere.gameObject.SetActive(false);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(false);
                 myPlayerSphere.SetActive(false);
-                myShineLabel.gameObject.SetActive(false);
-                myShinySlider.gameObject.SetActive(false);
-                myReflectLabel.gameObject.SetActive(false);
-                myReflectSlider.gameObject.SetActive(false);
-
-                backToMainMenuButton.gameObject.SetActive(false);
-                startButton.gameObject.SetActive(false);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(false);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
-
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.HOSTING:
                 backgroundCube.SetActive(true);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(true);
-                raceTypeDropDown.gameObject.SetActive(true);
-                racetrackLabel.gameObject.SetActive(true);
-                racetrackDropDown.gameObject.SetActive(true);
-                roundCountLabel.gameObject.SetActive(true);
-                roundCountSlider.gameObject.SetActive(true);
-                aiCountLabel.gameObject.SetActive(true);
-                aiCountSlider.gameObject.SetActive(true);
-                allowJoinLabel.gameObject.SetActive(true);
-                allowJoinToggle.gameObject.SetActive(true);
-                hostIPLabel.gameObject.SetActive(true);
-                hostIPValueLabel.gameObject.SetActive(true);
-                delayStartLabel.gameObject.SetActive(true);
-                delayStartSlider.gameObject.SetActive(true);
-
-                myNameLabel.gameObject.SetActive(true);
-                myNameInputField.gameObject.SetActive(true);
-                myColorLabel.gameObject.SetActive(true);
-                myColorPicker.gameObject.SetActive(true);
-                myPlayerSphere.gameObject.SetActive(true);
+                hostScreen.SetActive(true);
+                myPlayerSettings.SetActive(true);
                 myPlayerSphere.SetActive(true);
-                myShineLabel.gameObject.SetActive(true);
-                myShinySlider.gameObject.SetActive(true);
-                myReflectLabel.gameObject.SetActive(true);
-                myReflectSlider.gameObject.SetActive(true);
-
-                backToMainMenuButton.gameObject.SetActive(true);
-                startButton.gameObject.SetActive(true);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(false);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
-
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.JOINING:
                 backgroundCube.SetActive(true);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(true);
-                myNameInputField.gameObject.SetActive(true);
-                myColorLabel.gameObject.SetActive(true);
-                myColorPicker.gameObject.SetActive(true);
-                myPlayerSphere.gameObject.SetActive(true);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(true);
                 myPlayerSphere.SetActive(true);
-                myShineLabel.gameObject.SetActive(true);
-                myShinySlider.gameObject.SetActive(true);
-                myReflectLabel.gameObject.SetActive(true);
-                myReflectSlider.gameObject.SetActive(true);
-
-                backToMainMenuButton.gameObject.SetActive(true);
-                startButton.gameObject.SetActive(true);
-
+                joinScreen.SetActive(true);
                 TrackHUD_CountDownLabel.gameObject.SetActive(false);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
-
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.STARTING:
                 backgroundCube.SetActive(false);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(false);
-                myNameInputField.gameObject.SetActive(false);
-                myColorLabel.gameObject.SetActive(false);
-                myColorPicker.gameObject.SetActive(false);
-                myPlayerSphere.gameObject.SetActive(false);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(false);
                 myPlayerSphere.SetActive(false);
-                myShineLabel.gameObject.SetActive(false);
-                myShinySlider.gameObject.SetActive(false);
-                myReflectLabel.gameObject.SetActive(false);
-                myReflectSlider.gameObject.SetActive(false);
-
-                backToMainMenuButton.gameObject.SetActive(false);
-                startButton.gameObject.SetActive(false);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(true);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
-
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.PLAYING:
                 backgroundCube.SetActive(false);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(false);
-                myNameInputField.gameObject.SetActive(false);
-                myColorLabel.gameObject.SetActive(false);
-                myColorPicker.gameObject.SetActive(false);
-                myPlayerSphere.gameObject.SetActive(false);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(false);
                 myPlayerSphere.SetActive(false);
-                myShineLabel.gameObject.SetActive(false);
-                myShinySlider.gameObject.SetActive(false);
-                myReflectLabel.gameObject.SetActive(false);
-                myReflectSlider.gameObject.SetActive(false);
-
-                backToMainMenuButton.gameObject.SetActive(false);
-                startButton.gameObject.SetActive(false);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(true);
-
-                resultsTitle.gameObject.SetActive(false);
-                resultsTrack.gameObject.SetActive(false);
-                resultsLapXofY.gameObject.SetActive(false);
-                resultsType.gameObject.SetActive(false);
-                resultsGrid.gameObject.SetActive(false);
-                nextButton.gameObject.SetActive(false);
-
+                resultsScreen.SetActive(false);
                 break;
             case GameStates.PAUSED:
                 break;
             case GameStates.REVIEWING:
                 backgroundCube.SetActive(true);
-
                 mainMenuCanvas.SetActive(false);
-                //hostButton.gameObject.SetActive(false);
-                //joinButton.gameObject.SetActive(false);
-                //quitButton.gameObject.SetActive(false);
-
-                raceTypeLabel.gameObject.SetActive(false);
-                raceTypeDropDown.gameObject.SetActive(false);
-                racetrackLabel.gameObject.SetActive(false);
-                racetrackDropDown.gameObject.SetActive(false);
-                roundCountLabel.gameObject.SetActive(false);
-                roundCountSlider.gameObject.SetActive(false);
-                aiCountLabel.gameObject.SetActive(false);
-                aiCountSlider.gameObject.SetActive(false);
-                allowJoinLabel.gameObject.SetActive(false);
-                allowJoinToggle.gameObject.SetActive(false);
-                hostIPLabel.gameObject.SetActive(false);
-                hostIPValueLabel.gameObject.SetActive(false);
-                delayStartLabel.gameObject.SetActive(false);
-                delayStartSlider.gameObject.SetActive(false);
-
-                myNameLabel.gameObject.SetActive(false);
-                myNameInputField.gameObject.SetActive(false);
-                myColorLabel.gameObject.SetActive(false);
-                myColorPicker.gameObject.SetActive(false);
-                myPlayerSphere.gameObject.SetActive(false);
+                hostScreen.SetActive(false);
+                myPlayerSettings.SetActive(false);
                 myPlayerSphere.SetActive(false);
-                myShineLabel.gameObject.SetActive(false);
-                myShinySlider.gameObject.SetActive(false);
-                myReflectLabel.gameObject.SetActive(false);
-                myReflectSlider.gameObject.SetActive(false);
-
-                backToMainMenuButton.gameObject.SetActive(false);
-                startButton.gameObject.SetActive(false);
-
+                joinScreen.SetActive(false);
                 TrackHUD_CountDownLabel.gameObject.SetActive(false);
-
-                resultsTitle.gameObject.SetActive(true);
-                resultsTrack.gameObject.SetActive(true);
-                resultsLapXofY.gameObject.SetActive(true);
-                resultsType.gameObject.SetActive(true);
-                resultsGrid.gameObject.SetActive(true);
-                nextButton.gameObject.SetActive(true);
-
+                resultsScreen.SetActive(true);
                 break;
             default:
                 Debug.LogError("Game state unrecognized! Unable to update the UI.");
