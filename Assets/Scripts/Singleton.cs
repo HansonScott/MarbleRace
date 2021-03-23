@@ -2,23 +2,17 @@
 
 public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 {
-    private static T _instance;
-
-    public static T Instance
-    {
-        get { return _instance; }
-        private set { }
-    }
+    public static T Instance { get; private set; }
 
     public virtual void Start()
     {
-        if (_instance == null)
+        if (Instance == null)
         {
-            _instance = (T)this;
+            Instance = (T)this;
         }
         else
         {
-            Debug.LogError("Multiple instances attempted to be created for " + _instance.name);
+            Debug.LogError("Multiple instances attempted to be created for " + Instance.name);
         }
     }
 }

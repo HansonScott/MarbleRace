@@ -1,69 +1,56 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerCameraController : MonoBehaviour
 {
-    public GameObject player;
-    [SerializeField] private float turnSpeed;
+    public GameObject Player;
+    [SerializeField] private float _turnSpeed;
 
-    private Vector3 previousMousePosition;
-    private Vector3 previousPlayerPosition;
-
-    private Vector3 mouseMovement;
-    private float diffX, diffY;
+    private Vector3 _previousMousePosition, _previousPlayerPosition, _mouseMovement;
+    private float _diffX, _diffY;
 
     void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
+        Player = GameObject.FindGameObjectWithTag("Player");
 
         // start with something
-        previousMousePosition = Input.mousePosition;
-        previousPlayerPosition = player.transform.position;
+        _previousMousePosition = Input.mousePosition;
+        _previousPlayerPosition = Player.transform.position;
 
-        // a one time thing, so we can be relative to the player
-        transform.position = player.transform.position;
+        // a one time thing, so we can start relative to the player
+        transform.position = Player.transform.position;
     }
 
     void LateUpdate()
     {
-        if(player == null) { GameObject.Destroy(this.gameObject); }
+        if(Player == null) { GameObject.Destroy(this.gameObject); }
 
         #region move camera to player position
         // move the camera's focal point position with the sphere's position change
-        transform.position = transform.position + (player.transform.position - previousPlayerPosition);
+        transform.position = transform.position + (Player.transform.position - _previousPlayerPosition);
 
         // track player position for next loop
-        previousPlayerPosition = player.transform.position;
-        #endregion
-
-        #region Horizontal camera Control - using mouse movement (DISCONTINUED)
-        //// h rotate camera based on h mouse movement
-        //mouseMovement = previousMousePosition - Input.mousePosition;
-        //diffX = mouseMovement.x;
-        //transform.Rotate(Vector3.up, -diffX * turnSpeed * Time.deltaTime);
+        _previousPlayerPosition = Player.transform.position;
         #endregion
 
         #region Horizontal Control - using mouse down only
         // when the mouse is first pressed down, capture that as the starting point
         if (Input.GetMouseButtonDown(0))
         {
-            previousMousePosition = Input.mousePosition;
+            _previousMousePosition = Input.mousePosition;
         }
 
         // if the moue is 'still' being pressed down, then capture the movement
         if(Input.GetMouseButton(0))
         {
             // h rotate camera based on h mouse movement
-            mouseMovement = previousMousePosition - Input.mousePosition;
-            diffX = mouseMovement.x;
-            transform.Rotate(Vector3.up, -diffX * turnSpeed * Time.deltaTime);
+            _mouseMovement = _previousMousePosition - Input.mousePosition;
+            _diffX = _mouseMovement.x;
+            transform.Rotate(Vector3.up, -_diffX * _turnSpeed * Time.deltaTime);
         }
         #endregion
 
         #region vertical control - using mouse movement (NOT WORKING)
-        diffY = mouseMovement.y;
+        _diffY = _mouseMovement.y;
         // nope - this wiggles all over the place, not linear
         //transform.Rotate(transform.right, diffY * turnSpeed * Time.deltaTime);
         // nope - this uses global angle, so if we rotate, then this causes a sideways tilt instead of pitch

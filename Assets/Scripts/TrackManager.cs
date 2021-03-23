@@ -8,11 +8,8 @@ public class TrackManager : MonoBehaviour
 
     [SerializeField] private GameObject StartWall;
 
-    // Start is called before the first frame update
     void Start()
     {
-        // what should the track do when it starts
-
         StartCoroutine(DropStartWall());
     }
 
@@ -23,7 +20,7 @@ public class TrackManager : MonoBehaviour
 
         StartWall.transform.Translate(Vector3.down * StartWall.transform.localScale.y);
 
-        GameManager.Instance.CurrentRace.StartTime = DateTime.Now;
+        GameManager.Instance.CurrentRace.SetStartTime(DateTime.Now);
     }
 
 }

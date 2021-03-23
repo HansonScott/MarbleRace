@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using MLAPI;
 
 public class SphereController : NetworkedBehaviour
 {
+    private float FloorDepthBeforeRestart = 10;
+
     [SerializeField] protected float speed;
     public string SphereName;
     public DateTime FinishTime;
@@ -15,7 +15,7 @@ public class SphereController : NetworkedBehaviour
     void FixedUpdate()
     {
         // if fell too far down, start over.
-        if(this.gameObject.transform.position.y < (GameManager.Instance.CurrentRace.FinishPosition.y - 20))
+        if(this.gameObject.transform.position.y < (GameManager.Instance.CurrentRace.FinishPosition.y - FloorDepthBeforeRestart))
         { this.gameObject.transform.position = GameManager.Instance.CurrentRace.StartingPosition; }
     }
 }

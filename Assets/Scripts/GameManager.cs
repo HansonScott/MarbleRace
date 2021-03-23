@@ -60,6 +60,7 @@ public class GameManager : Singleton<GameManager>
         if (isHosting)
         {
             // start network host
+            // To Do: need to shut this down when the race/scene ends.
             NetworkingManager.Singleton.StartHost();
         }
         else
@@ -186,7 +187,7 @@ public class GameManager : Singleton<GameManager>
                 // before adding players, we need to add the player camera
                 PlayerCameraController cam = GameObject.Instantiate<PlayerCameraController>(playerCameraControllerPrefab);
                 player.playerCameraFocalPoint = cam;
-                cam.player = player.gameObject;
+                cam.Player = player.gameObject;
 
                 // apply our player settings
                 r.ApplyAppearanceToGameObject(player.gameObject);
@@ -289,7 +290,7 @@ public class GameManager : Singleton<GameManager>
             int remove = CalculateRemoval(CurrentRace.TotalLaps, CurrentRace.CurrentLap, CurrentRace.racers.Count);
             CurrentRace.RemoveSlowestPlayers(remove);
 
-            if (CurrentRace.PlayerAmongRacers())
+            if (CurrentRace.IsPlayerAmongRacers())
             {
                 // restart the scene for the next lap
                 StartNewRaceScene();

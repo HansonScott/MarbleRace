@@ -10,27 +10,25 @@ public enum RaceTypes
 }
 public class Race
 {
-    public List<Racer> racers;
-    public string displayName { get; set; }
     private int _trackID;
-    private int _lapCount;
-    public int TotalLaps { get { return _lapCount; } }
 
-    private int _currentLap = 1;
-    public int CurrentLap { get { return _currentLap; } }
-
-    private float _startDelay;
-    public float StartDelay { get { return _startDelay; } }
+    #region Public Properties
+    public List<Racer> racers;
+    public string DisplayName { get; set; }
+    public int TotalLaps { get; }
+    public int CurrentLap { get; private set; }
+    public float StartDelay { get; }
 
     private string _sceneName = String.Empty;
     public string SceneName { get { return _sceneName; } }
-    public Vector3 StartingPosition 
+    public RaceTypes RaceType { get; }
+    public DateTime StartTime { get; private set; }
+    public Vector3 StartingPosition
     {
         get
         {
-
             return GetStartingPositionByTrackID(_trackID);
-        } 
+        }
     }
     public Vector3 FinishPosition
     {
@@ -39,22 +37,6 @@ public class Race
             return GetFinishPositionByTrackID(_trackID);
         }
     }
-
-    private RaceTypes _raceType;
-    public RaceTypes RaceType
-    {
-        get { return _raceType; }
-    }
-
-    internal void ResetFinishTimes()
-    {
-        for(int i = 0; i < racers.Count; i++)
-        {
-            racers[i].finishTime = new DateTime();
-        }
-    }
-
-    public DateTime StartTime;
 
     public bool IsLapComplete
     {
@@ -68,20 +50,43 @@ public class Race
             return true;
         }
     }
-
     public bool isRaceComplete
     {
         get
         {
-            return (_currentLap > _lapCount);
+            return (CurrentLap > TotalLaps);
         }
+    }
+
+    #endregion
+
+    #region Constructors
+    public Race()
+    {
+        racers = new List<Racer>();
+    }
+    public Race(int trackID, RaceTypes raceTypeID, int lapCount, float startDelay)
+    {
+        _trackID = trackID;
+        SetSceneNameByTrackID();
+        RaceType = raceTypeID;
+        TotalLaps = lapCount;
+        StartDelay = startDelay;
+
+        CurrentLap = 1; // NOTE: this is 1-based, not 0-based
+    }
+    #endregion
+
+    #region Public Methods
+    internal void SetStartTime(DateTime dt)
+    {
+        StartTime = dt;
     }
 
     public void AdanceLap()
     {
-        _currentLap++;
+        CurrentLap++;
     }
-
     public void ResetRacersFinishTime()
     {
         for (int i = 0; i < racers.Count; i++)
@@ -89,51 +94,13 @@ public class Race
             racers[i].finishTime = new DateTime();
         }
     }
-
-    private Vector3 GetStartingPositionByTrackID(int trackID)
+    internal void ResetFinishTimes()
     {
-        switch(trackID)
+        for (int i = 0; i < racers.Count; i++)
         {
-            case 0:// "TestTrack"
-            default:
-                // search the game object for 'starting point'?
-                return new Vector3(0f, 3f, -14f); // note: this is the combination of both the parent start area, and the start point
+            racers[i].finishTime = new DateTime();
         }
     }
-    private Vector3 GetFinishPositionByTrackID(int trackID)
-    {
-        switch (trackID)
-        {
-            case 0:// "Track01"
-            default:
-                return new Vector3(3f, 1f, 17f);
-        }
-    }
-
-    public Race()
-    {
-        racers = new List<Racer>();
-    }
-
-    public Race(int trackID, RaceTypes raceTypeID, int lapCount, float startDelay)
-    {
-        _trackID = trackID;
-        SetSceneNameByTrackID();
-        _raceType = raceTypeID;
-        _lapCount = lapCount;
-        _startDelay = startDelay;
-    }
-
-    private void SetSceneNameByTrackID()
-    {
-        switch(_trackID)
-        {
-            case 0:
-                _sceneName = "TestTrack";
-                break;
-        }
-    }
-
     internal void AddPlayer(Racer r)
     {
         if (racers == null) { racers = new List<Racer>(); }
@@ -142,23 +109,21 @@ public class Race
     }
     internal void AddPlayer()
     {
-        if(racers == null) { racers = new List<Racer>(); }
+        if (racers == null) { racers = new List<Racer>(); }
 
         racers.Add(Racer.CreateRandomRacer());
     }
-
     internal void SetFinishTime(DateTime t, GameObject racer)
     {
-        for(int i = 0; i < racers.Count; i++)
+        for (int i = 0; i < racers.Count; i++)
         {
             // if this is the one we're looking for
-            if(racers[i].Name == racer.GetComponent<SphereController>().SphereName)
+            if (racers[i].Name == racer.GetComponent<SphereController>().SphereName)
             {
                 racers[i].finishTime = t;
             }
         }
     }
-
     internal void RemoveSlowestPlayers(int removeCount)
     {
         // assumption: the racers have already been sorted by their previous lap time
@@ -181,14 +146,45 @@ public class Race
             removeCount--;
         }
     }
-
-    internal bool PlayerAmongRacers()
+    internal bool IsPlayerAmongRacers()
     {
-        foreach(Racer r in racers)
+        foreach (Racer r in racers)
         {
-            if(r.Sphere.GetComponent<PlayerSphereController>() != null) { return true; }
+            if (r.Sphere.GetComponent<PlayerSphereController>() != null) { return true; }
         }
 
         return false;
     }
+    #endregion
+
+    #region Private Functions
+    private void SetSceneNameByTrackID()
+    {
+        switch(_trackID)
+        {
+            case 0:
+                _sceneName = "TestTrack";
+                break;
+        }
+    }
+    private Vector3 GetStartingPositionByTrackID(int trackID)
+    {
+        switch (trackID)
+        {
+            case 0:// "TestTrack"
+            default:
+                // search the game object for 'starting point'?
+                return new Vector3(0f, 3f, -14f); // note: this is the combination of both the parent start area, and the start point
+        }
+    }
+    private Vector3 GetFinishPositionByTrackID(int trackID)
+    {
+        switch (trackID)
+        {
+            case 0:// "Track01"
+            default:
+                return new Vector3(3f, 1f, 17f);
+        }
+    }
+    #endregion
 }
