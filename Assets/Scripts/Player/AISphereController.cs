@@ -2,11 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MLAPI;
 
-public class AISphereController : SphereController
+public class AISphereController : NetworkedBehaviour
 {
     private Vector3 _targetLocation;
     private bool _targetAcquired = false;
+
+    [SerializeField] protected float speed;
+    public string SphereName;
+    public DateTime FinishTime;
+    protected Rigidbody playerRigidBody;
+
 
     void Start()
     {

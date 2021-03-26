@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7150721208980433137}
   - component: {fileID: 4651953447902518880}
   - component: {fileID: 8361528375739735671}
+  - component: {fileID: 1104054942224487170}
   m_Layer: 0
   m_Name: PlayerSphere
   m_TagString: Player
@@ -125,10 +126,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e851c2b7bfb395e40b5b78a2ad6236b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerCameraFocalPoint: {fileID: 2186867688705255706, guid: d3867bea7742fe9488bc4b82b5e733e6,
+    type: 3}
   speed: 30
   SphereName: 
-  playerCameraFocalPoint: {fileID: 3177625232744705904, guid: d3867bea7742fe9488bc4b82b5e733e6,
-    type: 3}
 --- !u!114 &4651953447902518880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,3 +195,15 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1104054942224487170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6403031491922259697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0385f774febd1a748a643740214afb8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -1,8 +1,16 @@
 ﻿using UnityEngine;
+using MLAPI;
+using System;
 
-public class PlayerSphereController : SphereController
+public class PlayerSphereController : NetworkedBehaviour
 {
     public PlayerCameraController playerCameraFocalPoint;
+
+    [SerializeField] protected float speed;
+    public string SphereName;
+    public DateTime FinishTime;
+    protected Rigidbody playerRigidBody;
+
 
     // Start is called before the first frame update
     void Start()

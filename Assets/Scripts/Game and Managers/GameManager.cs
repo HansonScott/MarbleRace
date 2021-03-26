@@ -108,7 +108,6 @@ public class GameManager : Singleton<GameManager>
     }
 
     #region Starting a new race
-    [ServerRPC]
     internal Race CreateNewRaceFromUIInfo(RaceInfo info)
     {
         Race r = new Race(info.TrackID, info.RaceTypeID, info.LapCount, info.StartDelay); // SERVER
@@ -134,12 +133,11 @@ public class GameManager : Singleton<GameManager>
     }
     private void LevelLoading_completed(AsyncOperation obj)
     {
-        // now that the scene has loaded, then we can add players to it
-        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(CurrentRace.SceneName); // SERVER
-
         // set this scene as active, so we can add players to it.
+        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(CurrentRace.SceneName); // SERVER
         UnityEngine.SceneManagement.SceneManager.SetActiveScene(levelScene); // SERVER
 
+        // now that the scene has loaded, then we can add players to it
         List<GameObject> playersToAdjust = AddPlayerObjectsToRaceScene(); // SERVER
         AdjustRaceBasedOnRaceType(playersToAdjust); // SERVER
 
@@ -157,7 +155,6 @@ public class GameManager : Singleton<GameManager>
         UIManager.Instance.StartCountDown(CurrentRace.StartDelay); // CLIENT
     }
 
-    [ServerRPC]
     private void AdjustRaceBasedOnRaceType(List<GameObject> playersToAdjust)
     {
         if (CurrentRace.RaceType == RaceTypes.PureSpeed)
@@ -176,7 +173,6 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    [ServerRPC]
     private List<GameObject> AddPlayerObjectsToRaceScene()
     {
         // reference all the game objects, for the collision adjustment depending on track type
@@ -206,7 +202,7 @@ public class GameManager : Singleton<GameManager>
                 r.ApplyAppearanceToGameObject(player.gameObject); // SERVER
 
                 // set location to start location
-                SetStartingPosition(player, CurrentRace.StartingPosition, i); // SERVER
+                SetStartingPosition(player.gameObject, CurrentRace.StartingPosition, i); // SERVER
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject); // SERVER
@@ -223,7 +219,7 @@ public class GameManager : Singleton<GameManager>
                 player.SphereName = r.Name; // SERVER
 
                 // set location to start location
-                SetStartingPosition(player, CurrentRace.StartingPosition, i); // SERVER
+                SetStartingPosition(player.gameObject, CurrentRace.StartingPosition, i); // SERVER
 
                 // store temporarily for adjustments as a group
                 playersToAdjust.Add(player.gameObject); // SERVER
@@ -233,8 +229,7 @@ public class GameManager : Singleton<GameManager>
         return playersToAdjust;
     }
 
-    [ServerRPC]
-    private void SetStartingPosition(SphereController player, Vector3 trackStartingPosition, int positionOrder)
+    private void SetStartingPosition(GameObject player, Vector3 trackStartingPosition, int positionOrder)
     {
         Vector3 actualStartingPosition = trackStartingPosition;
 
@@ -262,17 +257,28 @@ public class GameManager : Singleton<GameManager>
     #endregion
 
     #region Finishing a Lap/Race
-    [ServerRPC]
     private void FinishLineHit(GameObject go)
     {
-        SphereController sc = go.GetComponent<SphereController>();
-        if(sc != null)
+        PlayerSphereController psc = go.GetComponent<PlayerSphereController>();
+        if(psc != null)
         {
             CurrentRace.SetFinishTime(DateTime.Now, go);
-            sc.FinishTime = DateTime.Now;
+            psc.FinishTime = DateTime.Now;
 
-            Debug.Log(sc.SphereName + " finished in " +
-                (sc.FinishTime - CurrentRace.StartTime).ToString(UIManager.TIME_FORMAT));
+            Debug.Log(psc.SphereName + " finished in " +
+                (psc.FinishTime - CurrentRace.StartTime).ToString(UIManager.TIME_FORMAT));
+        }
+        else
+        {
+            AISphereController asc = go.GetComponent<AISphereController>();
+            if(asc != null)
+            {
+                CurrentRace.SetFinishTime(DateTime.Now, go);
+                asc.FinishTime = DateTime.Now;
+
+                Debug.Log(asc.SphereName + " finished in " +
+                    (asc.FinishTime - CurrentRace.StartTime).ToString(UIManager.TIME_FORMAT));
+            }
         }
 
         if (CurrentRace.IsLapComplete)
@@ -284,8 +290,6 @@ public class GameManager : Singleton<GameManager>
 
             UIManager.Instance.PopulateResultsScreen();
         }
-
-        // race completion is handled in the 'next button' functionality
     }
 
     public void NextButtonPressed()

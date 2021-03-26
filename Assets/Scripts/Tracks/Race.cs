@@ -112,13 +112,21 @@ public class Race
     }
     internal void SetFinishTime(DateTime t, GameObject racer)
     {
+        //string name = string.Empty;
+        //if (racer.GetComponent<PlayerSphereController>() != null) { name = racer.GetComponent<PlayerSphereController>().SphereName; }
+        //else if (racer.GetComponent<AISphereController>() != null) { name = racer.GetComponent<AISphereController>().SphereName; }
+
         for (int i = 0; i < racers.Count; i++)
         {
-            // if this is the one we're looking for
-            if (racers[i].Name == racer.GetComponent<SphereController>().SphereName)
+            if(racers[i].Sphere == racer)
             {
                 racers[i].finishTime = t;
             }
+            // if this is the one we're looking for
+            //if (racers[i].Name.Equals(name))
+            //{
+            //    racers[i].finishTime = t;
+            //}
         }
     }
     internal void RemoveSlowestPlayers(int removeCount)

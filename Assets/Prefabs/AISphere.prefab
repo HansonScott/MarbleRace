@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 2776652783963098905}
   - component: {fileID: 3814271584450216841}
   - component: {fileID: 5190940694504920808}
+  - component: {fileID: 443620366365631132}
   m_Layer: 0
   m_Name: AISphere
   m_TagString: AI_Player
@@ -192,3 +193,15 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &443620366365631132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3399100824234008188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0385f774febd1a748a643740214afb8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
