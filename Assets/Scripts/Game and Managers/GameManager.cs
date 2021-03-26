@@ -9,11 +9,14 @@ using MLAPI.NetworkedVar;
 
 public class GameManager : Singleton<GameManager>
 {
+    #region Prefab references
     [SerializeField] private PlayerSphereController playerPrefab;
     [SerializeField] private AISphereController aiPrefab;
     [SerializeField] private PlayerCameraController playerCameraControllerPrefab;
     private FinishLineHandler finishLinePrefab;
+    #endregion
 
+    #region private fields, properties, getters/setters
     private GameStates _gameState = GameStates.TITLE;
     public GameStates CurrentGameState
     {
@@ -24,8 +27,8 @@ public class GameManager : Singleton<GameManager>
         _gameState = s;
         UIManager.Instance.UpdateUIFromGameState(_gameState);
     }
-
     public Race CurrentRace { get; private set; }
+    #endregion
 
     // Start is called before the first frame update
     public override void Start()
@@ -81,7 +84,6 @@ public class GameManager : Singleton<GameManager>
         CreateNewRace(); // SERVER
         StartNewRaceScene(); // SERVER and CLIENT
     }
-
     private void CreateNewRace()
     {
         // RUNS ON CLIENT AND SERVER (need to decouple)
@@ -99,6 +101,7 @@ public class GameManager : Singleton<GameManager>
     }
     #endregion
 
+    // move to network utility?
     private string GetHostIPAddress()
     {
         // runs on CLIENT
@@ -154,7 +157,6 @@ public class GameManager : Singleton<GameManager>
         // start the UI countdown once everthing has loaded.
         UIManager.Instance.StartCountDown(CurrentRace.StartDelay); // CLIENT
     }
-
     private void AdjustRaceBasedOnRaceType(List<GameObject> playersToAdjust)
     {
         if (CurrentRace.RaceType == RaceTypes.PureSpeed)
@@ -172,7 +174,6 @@ public class GameManager : Singleton<GameManager>
             }
         }
     }
-
     private List<GameObject> AddPlayerObjectsToRaceScene()
     {
         // reference all the game objects, for the collision adjustment depending on track type
@@ -228,7 +229,6 @@ public class GameManager : Singleton<GameManager>
 
         return playersToAdjust;
     }
-
     private void SetStartingPosition(GameObject player, Vector3 trackStartingPosition, int positionOrder)
     {
         Vector3 actualStartingPosition = trackStartingPosition;
@@ -291,7 +291,6 @@ public class GameManager : Singleton<GameManager>
             UIManager.Instance.PopulateResultsScreen();
         }
     }
-
     public void NextButtonPressed()
     {
         // advance the lap
@@ -334,16 +333,13 @@ public class GameManager : Singleton<GameManager>
         // this will finish the unloading of the level and all subsequent details
         levelUnLoading.completed += LevelUnLoading_completed;
     }
-
     private void LevelUnLoading_completed(AsyncOperation obj)
     {
     }
-
     private void ClearCurrentRace()
     {
         this.CurrentRace = null;
     }
-
     public int CalculateRemoval(int totalLaps, int currentLap, int playerCount)
     {
         // theory - linearly remove some on each lap until 5 are left on last lap

@@ -1,16 +1,8 @@
 ﻿using UnityEngine;
-using MLAPI;
-using System;
 
-public class PlayerSphereController : NetworkedBehaviour
+public class PlayerSphereController : SphereController
 {
     public PlayerCameraController playerCameraFocalPoint;
-
-    [SerializeField] protected float speed;
-    public string SphereName;
-    public DateTime FinishTime;
-    protected Rigidbody playerRigidBody;
-
 
     // Start is called before the first frame update
     void Start()
@@ -32,12 +24,13 @@ public class PlayerSphereController : NetworkedBehaviour
         if (GameManager.Instance.CurrentGameState == GameStates.STARTING ||
            GameManager.Instance.CurrentGameState == GameStates.PLAYING)
         {
-            // NOTE: we're using the camera's orientation for the movement, not the sphere!
-            float vInput = Input.GetAxis("Vertical");
-            playerRigidBody.AddForce(playerCameraFocalPoint.transform.forward * vInput * speed * Time.deltaTime);
+            // NOTE: we're using the camera's orientation for the direction of the movement, not the sphere!
+            Vector3 moveV = playerCameraFocalPoint.transform.forward * Input.GetAxis(InputKeys.VERTICAL) * speed * Time.deltaTime;
+            Vector3 moveH = playerCameraFocalPoint.transform.right * Input.GetAxis(InputKeys.HORIZONTAL) * speed * Time.deltaTime;
 
-            float hInput = Input.GetAxis("Horizontal");
-            playerRigidBody.AddForce(playerCameraFocalPoint.transform.right * hInput * speed * Time.deltaTime);
+            // move this to the server?
+            playerRigidBody.AddForce(moveV);
+            playerRigidBody.AddForce(moveH);
         }
     }
 }

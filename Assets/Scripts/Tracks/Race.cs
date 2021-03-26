@@ -11,6 +11,7 @@ public enum RaceTypes
 public class Race
 {
     private int _trackID;
+    private string _sceneName = String.Empty;
 
     #region Public Properties
     public List<Racer> racers;
@@ -18,25 +19,14 @@ public class Race
     public int TotalLaps { get; }
     public int CurrentLap { get; private set; }
     public float StartDelay { get; }
-
-    private string _sceneName = String.Empty;
     public string SceneName { get { return _sceneName; } }
     public RaceTypes RaceType { get; }
     public DateTime StartTime { get; private set; }
-    public Vector3 StartingPosition
-    {
-        get
-        {
-            return GetStartingPositionByTrackID(_trackID);
-        }
-    }
-    public Vector3 GetFinishPosition()
-    {
-        return GetFinishPositionByTrackID(_trackID);
-    }
-
+    public Vector3 StartingPosition { get { return GetStartingPositionByTrackID(_trackID); } }
+    public Vector3 GetFinishPosition() { return GetFinishPositionByTrackID(_trackID); }
+    public bool isRaceComplete { get { return (CurrentLap > TotalLaps); } }
     public bool IsLapComplete
-    {
+    { 
         get
         {
             foreach (Racer r in this.racers)
@@ -45,13 +35,6 @@ public class Race
             }
 
             return true;
-        }
-    }
-    public bool isRaceComplete
-    {
-        get
-        {
-            return (CurrentLap > TotalLaps);
         }
     }
 
@@ -112,21 +95,12 @@ public class Race
     }
     internal void SetFinishTime(DateTime t, GameObject racer)
     {
-        //string name = string.Empty;
-        //if (racer.GetComponent<PlayerSphereController>() != null) { name = racer.GetComponent<PlayerSphereController>().SphereName; }
-        //else if (racer.GetComponent<AISphereController>() != null) { name = racer.GetComponent<AISphereController>().SphereName; }
-
         for (int i = 0; i < racers.Count; i++)
         {
-            if(racers[i].Sphere == racer)
+            if (racers[i].Sphere == racer)
             {
                 racers[i].finishTime = t;
             }
-            // if this is the one we're looking for
-            //if (racers[i].Name.Equals(name))
-            //{
-            //    racers[i].finishTime = t;
-            //}
         }
     }
     internal void RemoveSlowestPlayers(int removeCount)

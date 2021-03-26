@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using MLAPI;
 
-public class AISphereController : NetworkedBehaviour
+public class AISphereController : SphereController
 {
     private Vector3 _targetLocation;
     private bool _targetAcquired = false;
-
-    [SerializeField] protected float speed;
-    public string SphereName;
-    public DateTime FinishTime;
-    protected Rigidbody playerRigidBody;
-
 
     void Start()
     {
@@ -22,25 +13,25 @@ public class AISphereController : NetworkedBehaviour
 
     void Update()
     {
-        // if we've finished, stop processing.
+        // if we've finished, stop moving.
         if (this.FinishTime != DateTime.MinValue) { return; }
 
-        //if(IsLocalPlayer)
-        //{
         HandleMove();
-        //}
     }
 
     private void HandleMove()
     {
-        // had to put this here because the assets of the level are not all loaded on start or awake.
+        // had to put this here because the assets of the level are not all loaded 
+        // at this sphere's start or awake method.
         if (!_targetAcquired) { AcquireTarget(); }
 
         // move towards the finish area
         Vector3 directionNeeded = (_targetLocation - this.transform.position);
-
         directionNeeded.Normalize();
-        playerRigidBody.AddForce(directionNeeded * speed * Time.deltaTime);
+        Vector3 intendedMovement = directionNeeded * speed * Time.deltaTime;
+
+        // move this portion to the server?
+        playerRigidBody.AddForce(intendedMovement);
     }
 
     private void AcquireTarget()
