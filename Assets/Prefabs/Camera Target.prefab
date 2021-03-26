@@ -57,7 +57,6 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -82,7 +81,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &2186867688705255706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,8 +93,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 785b47b5fc65e6549959809cae1d33f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 6403031491922259697, guid: 340185134b10ad9448c62f35e14c2753, type: 3}
-  turnSpeed: 0.2
+  Player: {fileID: 6403031491922259697, guid: 340185134b10ad9448c62f35e14c2753, type: 3}
+  _turnSpeed: 0.2
 --- !u!1 &2186867689680698102
 GameObject:
   m_ObjectHideFlags: 0

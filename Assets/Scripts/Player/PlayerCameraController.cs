@@ -3,7 +3,7 @@
 public class PlayerCameraController : MonoBehaviour
 {
     public GameObject Player;
-    [SerializeField] private float _turnSpeed;
+    [SerializeField] private float _turnSpeed = 0.2f;
 
     private Vector3 _previousMousePosition, _previousPlayerPosition, _mouseMovement;
     private float _diffX, _diffY;
