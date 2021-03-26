@@ -30,12 +30,9 @@ public class Race
             return GetStartingPositionByTrackID(_trackID);
         }
     }
-    public Vector3 FinishPosition
+    public Vector3 GetFinishPosition()
     {
-        get
-        {
-            return GetFinishPositionByTrackID(_trackID);
-        }
+        return GetFinishPositionByTrackID(_trackID);
     }
 
     public bool IsLapComplete

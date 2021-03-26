@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using MLAPI;
 using System.Net;
+using MLAPI;
+using MLAPI.Messaging;
+using MLAPI.NetworkedVar;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -54,7 +56,6 @@ public class GameManager : Singleton<GameManager>
     public void StartGame()
     {
         bool isHosting = (CurrentGameState == GameStates.HOSTING);
-        SetCurrentGameState(GameStates.STARTING);
 
         // start the network host (join?)
         if (isHosting)
@@ -62,6 +63,8 @@ public class GameManager : Singleton<GameManager>
             // start network host
             // To Do: need to shut this down when the race/scene ends.
             NetworkingManager.Singleton.StartHost();
+
+            SetCurrentGameState(GameStates.STARTING); // SERVER
         }
         else
         {
@@ -71,82 +74,90 @@ public class GameManager : Singleton<GameManager>
 
             // start network client
             NetworkingManager.Singleton.StartClient();
+
+            // state should get pulled from server from this point on...
         }
 
-        CreateNewRaceFromUIInfo();
-        StartNewRaceScene();
+        CreateNewRace(); // SERVER
+        StartNewRaceScene(); // SERVER and CLIENT
     }
 
-    private void CreateNewRaceFromUIInfo()
+    private void CreateNewRace()
     {
+        // RUNS ON CLIENT AND SERVER (need to decouple)
+
         // gather general race info
-        RaceInfo ri = UIManager.Instance.GetRaceInfo();
-        Race thisRace = GameManager.Instance.CreateNewRaceFromUIInfo(ri);
+        RaceInfo ri = UIManager.Instance.GetRaceInfo(); // CLIENT
+        Race thisRace = GameManager.Instance.CreateNewRaceFromUIInfo(ri); //SERVER
 
         // gather settings and add this player
-        PlayerInfo pi = UIManager.Instance.GetPlayerInfo();
-        Racer thisRacer = new Racer(pi.Name, pi.Color, pi.Shine, pi.Reflect, true);
-        thisRace.AddPlayer(thisRacer);
+        PlayerInfo pi = UIManager.Instance.GetPlayerInfo(); // CLIENT
+        Racer thisRacer = new Racer(pi.Name, pi.Color, pi.Shine, pi.Reflect, true); // CLIENT
+        thisRace.AddPlayer(thisRacer); // SERVER
 
-        GameManager.Instance.CurrentRace = thisRace;
+        GameManager.Instance.CurrentRace = thisRace; // SERVER
     }
     #endregion
 
     private string GetHostIPAddress()
     {
+        // runs on CLIENT
+
         IPHostEntry ipHostEntry = Dns.GetHostEntry(Dns.GetHostName());
         return ipHostEntry.AddressList[ipHostEntry.AddressList.Length - 1].ToString(); // get the last one (?)
     }
 
     #region Starting a new race
+    [ServerRPC]
     internal Race CreateNewRaceFromUIInfo(RaceInfo info)
     {
-        Race r = new Race(info.TrackID, info.RaceTypeID, info.LapCount, info.StartDelay);
+        Race r = new Race(info.TrackID, info.RaceTypeID, info.LapCount, info.StartDelay); // SERVER
 
-        for (int i = 0; i < info.AICount; i++)
+        for (int i = 0; i < info.AICount; i++) // SERVER
         {
-            r.AddPlayer();
+            r.AddPlayer(); // SERVER
         }
 
-        CurrentRace = r;
-        return r;
+        CurrentRace = r; // SERVER
+        return r; // SERVER
     }
     internal void StartNewRaceScene()
     {
-        CurrentRace.ResetFinishTimes();
+        CurrentRace.ResetFinishTimes(); // SERVER
 
         // scene manager to load and show this race
-        AsyncOperation levelLoading = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
-        CurrentRace.SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+        AsyncOperation levelLoading = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync( // CLIENT
+        CurrentRace.SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive); // CLIENT
 
         // this will finish the loading of the level and all subsequent details
-        levelLoading.completed += LevelLoading_completed;
+        levelLoading.completed += LevelLoading_completed; // CLIENT
     }
     private void LevelLoading_completed(AsyncOperation obj)
     {
         // now that the scene has loaded, then we can add players to it
-        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(CurrentRace.SceneName);
+        Scene levelScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(CurrentRace.SceneName); // SERVER
 
         // set this scene as active, so we can add players to it.
-        UnityEngine.SceneManagement.SceneManager.SetActiveScene(levelScene);
+        UnityEngine.SceneManagement.SceneManager.SetActiveScene(levelScene); // SERVER
 
-        List<GameObject> playersToAdjust = AddPlayerObjectsToRaceScene();
-        AdjustRaceBasedOnRaceType(playersToAdjust);
+        List<GameObject> playersToAdjust = AddPlayerObjectsToRaceScene(); // SERVER
+        AdjustRaceBasedOnRaceType(playersToAdjust); // SERVER
 
         // hook up the finish line event trigger
-        finishLinePrefab = GameObject.FindObjectOfType<FinishLineHandler>();
-        finishLinePrefab.onPlayerFinished.AddListener(FinishLineHit);
+        finishLinePrefab = GameObject.FindObjectOfType<FinishLineHandler>(); // SERVER
+        finishLinePrefab.onPlayerFinished.AddListener(FinishLineHit); // SERVER
 
         // hook up the start delay timer
-        TrackManager tm = GameObject.FindObjectOfType<TrackManager>();
-        tm.StartDelay = CurrentRace.StartDelay;
+        TrackManager tm = GameObject.FindObjectOfType<TrackManager>(); // SERVER
+        tm.StartDelay = CurrentRace.StartDelay; // SERVER and CLIENT
 
-        SetCurrentGameState(GameStates.STARTING);
+        SetCurrentGameState(GameStates.STARTING); // SERVER and CLIENT
 
         // start the UI countdown once everthing has loaded.
-        UIManager.Instance.StartCountDown(CurrentRace.StartDelay);
+        UIManager.Instance.StartCountDown(CurrentRace.StartDelay); // CLIENT
     }
 
+    [ServerRPC]
     private void AdjustRaceBasedOnRaceType(List<GameObject> playersToAdjust)
     {
         if (CurrentRace.RaceType == RaceTypes.PureSpeed)
@@ -165,6 +176,7 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    [ServerRPC]
     private List<GameObject> AddPlayerObjectsToRaceScene()
     {
         // reference all the game objects, for the collision adjustment depending on track type
@@ -179,46 +191,49 @@ public class GameManager : Singleton<GameManager>
             {
                 //PlayerSphereController player = (PlayerSphereController)UnityEditor.PrefabUtility.InstantiatePrefab(playerPrefab, levelScene);
                 PlayerSphereController player = GameObject.Instantiate<PlayerSphereController>(playerPrefab);
-                player.gameObject.SetActive(true);
-                r.Sphere = player.gameObject;
-                player.SphereName = r.Name;
+                // NOTE: add the server version of this too (keyword: spawn)
+                player.gameObject.SetActive(true); // SERVER
+                r.Sphere = player.gameObject; // SERVER
+                player.SphereName = r.Name; // SERVER
 
                 // link references to camera, both ways
                 // before adding players, we need to add the player camera
-                PlayerCameraController cam = GameObject.Instantiate<PlayerCameraController>(playerCameraControllerPrefab);
-                player.playerCameraFocalPoint = cam;
-                cam.Player = player.gameObject;
+                PlayerCameraController cam = GameObject.Instantiate<PlayerCameraController>(playerCameraControllerPrefab);  // CLIENT
+                player.playerCameraFocalPoint = cam; // CLIENT
+                cam.Player = player.gameObject; // CLIENT
 
                 // apply our player settings
-                r.ApplyAppearanceToGameObject(player.gameObject);
+                r.ApplyAppearanceToGameObject(player.gameObject); // SERVER
 
                 // set location to start location
-                SetStartingPosition(player, CurrentRace.StartingPosition, i);
+                SetStartingPosition(player, CurrentRace.StartingPosition, i); // SERVER
 
                 // store temporarily for adjustments as a group
-                playersToAdjust.Add(player.gameObject);
+                playersToAdjust.Add(player.gameObject); // SERVER
             }
             else
             {
                 //AISphereController player = (AISphereController)UnityEditor.PrefabUtility.InstantiatePrefab(aiPrefab, levelScene);
-                AISphereController player = GameObject.Instantiate<AISphereController>(aiPrefab);
-                r.ApplyAppearanceToGameObject(player.gameObject);
-                player.gameObject.SetActive(true);
-                r.Sphere = player.gameObject;
+                AISphereController player = GameObject.Instantiate<AISphereController>(aiPrefab); // SERVER
+                // NOTE: add the server version of this too (keyword: spawn)
+                r.ApplyAppearanceToGameObject(player.gameObject); // SERVER
+                player.gameObject.SetActive(true); // SERVER
+                r.Sphere = player.gameObject; // SERVER
 
-                player.SphereName = r.Name;
+                player.SphereName = r.Name; // SERVER
 
                 // set location to start location
-                SetStartingPosition(player, CurrentRace.StartingPosition, i);
+                SetStartingPosition(player, CurrentRace.StartingPosition, i); // SERVER
 
                 // store temporarily for adjustments as a group
-                playersToAdjust.Add(player.gameObject);
+                playersToAdjust.Add(player.gameObject); // SERVER
             }
         } // end for
 
         return playersToAdjust;
     }
 
+    [ServerRPC]
     private void SetStartingPosition(SphereController player, Vector3 trackStartingPosition, int positionOrder)
     {
         Vector3 actualStartingPosition = trackStartingPosition;
@@ -247,6 +262,7 @@ public class GameManager : Singleton<GameManager>
     #endregion
 
     #region Finishing a Lap/Race
+    [ServerRPC]
     private void FinishLineHit(GameObject go)
     {
         SphereController sc = go.GetComponent<SphereController>();
