@@ -9,6 +9,8 @@ using MLAPI.NetworkedVar;
 
 public class GameManager : Singleton<GameManager>
 {
+    public const bool MULTIPLAYER_ENABLED = false;
+
     #region Prefab references
     [SerializeField] private PlayerSphereController playerPrefab;
     [SerializeField] private AISphereController aiPrefab;
