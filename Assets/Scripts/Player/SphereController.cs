@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-using MLAPI;
 using System;
 
-public abstract class SphereController : NetworkedBehaviour
+public abstract class SphereController : MonoBehaviour
 {
     [SerializeField] protected float speed;
     public string SphereName;

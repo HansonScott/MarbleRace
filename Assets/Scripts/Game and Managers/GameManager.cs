@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Net;
-using MLAPI;
-using MLAPI.Messaging;
-using MLAPI.NetworkedVar;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -67,7 +64,7 @@ public class GameManager : Singleton<GameManager>
         {
             // start network host
             // To Do: need to shut this down when the race/scene ends.
-            NetworkingManager.Singleton.StartHost();
+            //NetworkingManager.Singleton.StartHost();
 
             SetCurrentGameState(GameStates.STARTING); // SERVER
         }
@@ -78,7 +75,7 @@ public class GameManager : Singleton<GameManager>
             // set the IP into the network UNetTransport.connectAddress variable
 
             // start network client
-            NetworkingManager.Singleton.StartClient();
+            //NetworkingManager.Singleton.StartClient();
 
             // state should get pulled from server from this point on...
         }
